@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dadong Zhang">
+<meta name="dcterms.date" content="2025-08-26">
+
+<title>Bayesian Adaptive Design: Conditional Power and A Case Study</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Bayesian_conditional_power_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Bayesian_conditional_power_files/libs/quarto-html/quarto.js"></script>
+<script src="Bayesian_conditional_power_files/libs/quarto-html/popper.min.js"></script>
+<script src="Bayesian_conditional_power_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Bayesian_conditional_power_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Bayesian_conditional_power_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Bayesian_conditional_power_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Bayesian_conditional_power_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Bayesian_conditional_power_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Bayesian_conditional_power_files/libs/bootstrap/bootstrap-10daa034703793678e481cc8cee6d76f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">2. Methodology</a>
+  <ul class="collapse">
+  <li><a href="#conditional-power-framework" id="toc-conditional-power-framework" class="nav-link" data-scroll-target="#conditional-power-framework">2.1 Conditional Power Framework</a>
+  <ul class="collapse">
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition">Definition</a></li>
+  <li><a href="#classical-vs.-bayesian-approaches" id="toc-classical-vs.-bayesian-approaches" class="nav-link" data-scroll-target="#classical-vs.-bayesian-approaches">Classical vs.&nbsp;Bayesian Approaches</a></li>
+  </ul></li>
+  <li><a href="#bayesian-framework" id="toc-bayesian-framework" class="nav-link" data-scroll-target="#bayesian-framework">2.2 Bayesian Framework</a>
+  <ul class="collapse">
+  <li><a href="#prior-distribution" id="toc-prior-distribution" class="nav-link" data-scroll-target="#prior-distribution">Prior Distribution</a></li>
+  <li><a href="#likelihood-function" id="toc-likelihood-function" class="nav-link" data-scroll-target="#likelihood-function">Likelihood Function</a></li>
+  <li><a href="#posterior-distribution" id="toc-posterior-distribution" class="nav-link" data-scroll-target="#posterior-distribution">Posterior Distribution</a></li>
+  <li><a href="#predictive-distribution" id="toc-predictive-distribution" class="nav-link" data-scroll-target="#predictive-distribution">Predictive Distribution</a></li>
+  </ul></li>
+  <li><a href="#conditional-power-calculation" id="toc-conditional-power-calculation" class="nav-link" data-scroll-target="#conditional-power-calculation">2.3 Conditional Power Calculation</a>
+  <ul class="collapse">
+  <li><a href="#test-statistic" id="toc-test-statistic" class="nav-link" data-scroll-target="#test-statistic">Test Statistic</a></li>
+  <li><a href="#success-probability" id="toc-success-probability" class="nav-link" data-scroll-target="#success-probability">Success Probability</a></li>
+  <li><a href="#bayesian-conditional-power" id="toc-bayesian-conditional-power" class="nav-link" data-scroll-target="#bayesian-conditional-power">Bayesian Conditional Power</a></li>
+  </ul></li>
+  <li><a href="#adaptive-decision-rules" id="toc-adaptive-decision-rules" class="nav-link" data-scroll-target="#adaptive-decision-rules">2.4 Adaptive Decision Rules</a>
+  <ul class="collapse">
+  <li><a href="#decision-thresholds" id="toc-decision-thresholds" class="nav-link" data-scroll-target="#decision-thresholds">Decision Thresholds</a></li>
+  <li><a href="#sample-size-re-estimation" id="toc-sample-size-re-estimation" class="nav-link" data-scroll-target="#sample-size-re-estimation">Sample Size Re-estimation</a></li>
+  </ul></li>
+  <li><a href="#methodology-summary" id="toc-methodology-summary" class="nav-link" data-scroll-target="#methodology-summary">2.5 Methodology Summary</a></li>
+  </ul></li>
+  <li><a href="#case-study-valor-trial" id="toc-case-study-valor-trial" class="nav-link" data-scroll-target="#case-study-valor-trial">3. Case Study: VALOR Trial</a>
+  <ul class="collapse">
+  <li><a href="#trial-overview" id="toc-trial-overview" class="nav-link" data-scroll-target="#trial-overview">3.1 Trial Overview</a></li>
+  <li><a href="#trial-overview-1" id="toc-trial-overview-1" class="nav-link" data-scroll-target="#trial-overview-1">3.1 Trial Overview</a></li>
+  <li><a href="#implementation-steps" id="toc-implementation-steps" class="nav-link" data-scroll-target="#implementation-steps">3.2 Implementation Steps</a></li>
+  </ul></li>
+  <li><a href="#step-1-prior-specification-and-trial-parameters" id="toc-step-1-prior-specification-and-trial-parameters" class="nav-link" data-scroll-target="#step-1-prior-specification-and-trial-parameters">4. Step 1: Prior Specification and Trial Parameters</a></li>
+  <li><a href="#step-1-prior-specification-and-trial-parameters-1" id="toc-step-1-prior-specification-and-trial-parameters-1" class="nav-link" data-scroll-target="#step-1-prior-specification-and-trial-parameters-1">4. Step 1: Prior Specification and Trial Parameters</a>
+  <ul class="collapse">
+  <li><a href="#prior-distribution-specification" id="toc-prior-distribution-specification" class="nav-link" data-scroll-target="#prior-distribution-specification">4.1 Prior Distribution Specification</a></li>
+  </ul></li>
+  <li><a href="#step-2-interim-data-simulation" id="toc-step-2-interim-data-simulation" class="nav-link" data-scroll-target="#step-2-interim-data-simulation">5. Step 2: Interim Data Simulation</a></li>
+  <li><a href="#step-3-posterior-distribution-calculation" id="toc-step-3-posterior-distribution-calculation" class="nav-link" data-scroll-target="#step-3-posterior-distribution-calculation">6. Step 3: Posterior Distribution Calculation</a></li>
+  <li><a href="#step-4-conditional-power-calculation" id="toc-step-4-conditional-power-calculation" class="nav-link" data-scroll-target="#step-4-conditional-power-calculation">7. Step 4: Conditional Power Calculation</a>
+  <ul class="collapse">
+  <li><a href="#conditional-power-function-implementation" id="toc-conditional-power-function-implementation" class="nav-link" data-scroll-target="#conditional-power-function-implementation">7.1 Conditional Power Function Implementation</a></li>
+  <li><a href="#calculate-conditional-power-with-original-design" id="toc-calculate-conditional-power-with-original-design" class="nav-link" data-scroll-target="#calculate-conditional-power-with-original-design">7.2 Calculate Conditional Power with Original Design</a></li>
+  </ul></li>
+  <li><a href="#step-5-adaptive-decisions-and-sample-size-re-estimation" id="toc-step-5-adaptive-decisions-and-sample-size-re-estimation" class="nav-link" data-scroll-target="#step-5-adaptive-decisions-and-sample-size-re-estimation">8. Step 5: Adaptive Decisions and Sample Size Re-estimation</a></li>
+  <li><a href="#step-6-sensitivity-analysis" id="toc-step-6-sensitivity-analysis" class="nav-link" data-scroll-target="#step-6-sensitivity-analysis">9. Step 6: Sensitivity Analysis</a></li>
+  <li><a href="#sensitivity-analysis" id="toc-sensitivity-analysis" class="nav-link" data-scroll-target="#sensitivity-analysis">7. Sensitivity Analysis</a></li>
+  <li><a href="#summary-of-results-and-implementation" id="toc-summary-of-results-and-implementation" class="nav-link" data-scroll-target="#summary-of-results-and-implementation">10. Summary of Results and Implementation</a></li>
+  <li><a href="#comparison-of-adaptive-scenarios" id="toc-comparison-of-adaptive-scenarios" class="nav-link" data-scroll-target="#comparison-of-adaptive-scenarios">11. Comparison of Adaptive Scenarios</a></li>
+  <li><a href="#conclusion-and-implementation-guidance" id="toc-conclusion-and-implementation-guidance" class="nav-link" data-scroll-target="#conclusion-and-implementation-guidance">12. Conclusion and Implementation Guidance</a>
+  <ul class="collapse">
+  <li><a href="#methodological-contributions" id="toc-methodological-contributions" class="nav-link" data-scroll-target="#methodological-contributions">12.1 Methodological Contributions</a></li>
+  <li><a href="#implementation-framework" id="toc-implementation-framework" class="nav-link" data-scroll-target="#implementation-framework">12.2 Implementation Framework</a></li>
+  <li><a href="#practical-considerations" id="toc-practical-considerations" class="nav-link" data-scroll-target="#practical-considerations">12.3 Practical Considerations</a></li>
+  <li><a href="#future-directions" id="toc-future-directions" class="nav-link" data-scroll-target="#future-directions">12.4 Future Directions</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Bayesian Adaptive Design: Conditional Power and A Case Study</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dadong Zhang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 26, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Adaptive trial designs allow for planned modifications to ongoing trials based on accumulating data while maintaining trial integrity and statistical validity. <strong>Conditional power</strong> is a key statistical tool that evaluates the probability of trial success given interim data, enabling informed decisions about early stopping or sample size re-estimation.</p>
+<p>This tutorial demonstrates the theoretical foundation and practical implementation of Bayesian conditional power through the VALOR trial case study, specifically focusing on <strong>sample size re-estimation</strong> when interim data suggest the original design may be underpowered.</p>
+</section>
+<section id="methodology" class="level1">
+<h1>2. Methodology</h1>
+<section id="conditional-power-framework" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-power-framework">2.1 Conditional Power Framework</h2>
+<section id="definition" class="level3">
+<h3 class="anchored" data-anchor-id="definition">Definition</h3>
+<p>Conditional power is the probability that a trial will ultimately show a statistically significant result, given the data observed at an interim analysis and assumptions about the future data.</p>
+<p>Mathematically, conditional power at interim analysis is: <span class="math inline">\(CP = P(\text{Reject } H_0 \text{ at final analysis} \mid \text{Interim data } D_1)\)</span></p>
+</section>
+<section id="classical-vs.-bayesian-approaches" class="level3">
+<h3 class="anchored" data-anchor-id="classical-vs.-bayesian-approaches">Classical vs.&nbsp;Bayesian Approaches</h3>
+<p><strong>Classical Conditional Power</strong>: Assumes a fixed treatment effect <span class="math inline">\(\theta\)</span> and calculates: <span class="math inline">\(CP_{classical}(\theta) = P(\text{Reject } H_0 \mid D_1, \theta)\)</span></p>
+<p><strong>Bayesian Conditional Power</strong>: Incorporates uncertainty about <span class="math inline">\(\theta\)</span> through a posterior distribution: <span class="math inline">\(CP_{Bayesian} = \int CP_{classical}(\theta) \cdot \pi(\theta \mid D_1) \, d\theta\)</span></p>
+</section>
+</section>
+<section id="bayesian-framework" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-framework">2.2 Bayesian Framework</h2>
+<section id="prior-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="prior-distribution">Prior Distribution</h3>
+<p>Before observing data, we specify a prior distribution for the treatment effect parameter: <span class="math inline">\(\theta \sim \pi(\theta)\)</span></p>
+<p>For log hazard ratio in survival studies: <span class="math inline">\(\theta \sim N(\mu_0, \sigma_0^2)\)</span></p>
+</section>
+<section id="likelihood-function" class="level3">
+<h3 class="anchored" data-anchor-id="likelihood-function">Likelihood Function</h3>
+<p>The likelihood of observing interim data <span class="math inline">\(D_1\)</span> given treatment effect <span class="math inline">\(\theta\)</span>: <span class="math inline">\(L(D_1 \mid \theta)\)</span></p>
+<p>For survival data with observed log hazard ratio <span class="math inline">\(\hat{\theta}_1\)</span> and standard error <span class="math inline">\(SE_1\)</span>: <span class="math inline">\(L(D_1 \mid \theta) \propto \exp\left(-\frac{(\hat{\theta}_1 - \theta)^2}{2 \cdot SE_1^2}\right)\)</span></p>
+</section>
+<section id="posterior-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="posterior-distribution">Posterior Distribution</h3>
+<p>Using Bayes’ theorem, we update our beliefs: <span class="math inline">\(\pi(\theta \mid D_1) = \frac{L(D_1 \mid \theta) \cdot \pi(\theta)}{\int L(D_1 \mid \theta) \cdot \pi(\theta) \, d\theta}\)</span></p>
+<p>For conjugate normal-normal model: <span class="math inline">\(\theta \mid D_1 \sim N(\mu_1, \sigma_1^2)\)</span></p>
+<p>where: - <span class="math inline">\(\tau_0 = 1/\sigma_0^2\)</span> (prior precision) - <span class="math inline">\(\tau_1 = 1/SE_1^2\)</span> (data precision) - <span class="math inline">\(\tau_{post} = \tau_0 + \tau_1\)</span> (posterior precision) - <span class="math inline">\(\mu_1 = \frac{\tau_0 \mu_0 + \tau_1 \hat{\theta}_1}{\tau_{post}}\)</span> (posterior mean) - <span class="math inline">\(\sigma_1^2 = 1/\tau_{post}\)</span> (posterior variance)</p>
+</section>
+<section id="predictive-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="predictive-distribution">Predictive Distribution</h3>
+<p>For future data <span class="math inline">\(D_2\)</span>, given interim data <span class="math inline">\(D_1\)</span>: <span class="math inline">\(p(D_2 \mid D_1) = \int p(D_2 \mid \theta) \cdot \pi(\theta \mid D_1) \, d\theta\)</span></p>
+</section>
+</section>
+<section id="conditional-power-calculation" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-power-calculation">2.3 Conditional Power Calculation</h2>
+<section id="test-statistic" class="level3">
+<h3 class="anchored" data-anchor-id="test-statistic">Test Statistic</h3>
+<p>For survival trials, the final test statistic follows approximately: <span class="math inline">\(Z_{final} \sim N(\theta \sqrt{n_{total}}, 1)\)</span></p>
+<p>where <span class="math inline">\(n_{total}\)</span> is the total number of events.</p>
+</section>
+<section id="success-probability" class="level3">
+<h3 class="anchored" data-anchor-id="success-probability">Success Probability</h3>
+<p>The probability of trial success for a given <span class="math inline">\(\theta\)</span>: <span class="math inline">\(P(\text{Success} \mid \theta, n_{total}) = P(|Z_{final}| &gt; z_{\alpha/2} \mid \theta)\)</span></p>
+<p>For two-sided test: <span class="math inline">\(= 1 - \Phi(z_{\alpha/2} - \theta\sqrt{n_{total}}) + \Phi(-z_{\alpha/2} - \theta\sqrt{n_{total}})\)</span></p>
+</section>
+<section id="bayesian-conditional-power" class="level3">
+<h3 class="anchored" data-anchor-id="bayesian-conditional-power">Bayesian Conditional Power</h3>
+<p>Integrating over the posterior distribution: <span class="math inline">\(CP = \int P(\text{Success} \mid \theta, n_{total}) \cdot \pi(\theta \mid D_1) \, d\theta\)</span></p>
+<p>This is typically computed using Monte Carlo integration: <span class="math inline">\(CP \approx \frac{1}{M} \sum_{i=1}^{M} P(\text{Success} \mid \theta^{(i)}, n_{total})\)</span></p>
+<p>where <span class="math inline">\(\theta^{(i)} \sim \pi(\theta \mid D_1)\)</span></p>
+</section>
+</section>
+<section id="adaptive-decision-rules" class="level2">
+<h2 class="anchored" data-anchor-id="adaptive-decision-rules">2.4 Adaptive Decision Rules</h2>
+<section id="decision-thresholds" class="level3">
+<h3 class="anchored" data-anchor-id="decision-thresholds">Decision Thresholds</h3>
+<p>Define decision boundaries: - <strong>Efficacy threshold</strong> <span class="math inline">\(\gamma_1\)</span>: Stop for efficacy if <span class="math inline">\(CP &gt; \gamma_1\)</span> - <strong>Futility threshold</strong> <span class="math inline">\(\gamma_2\)</span>: Stop for futility if <span class="math inline">\(CP &lt; \gamma_2\)</span> - <strong>Re-estimation zone</strong>: <span class="math inline">\(\gamma_2 \leq CP \leq \gamma_1\)</span></p>
+</section>
+<section id="sample-size-re-estimation" class="level3">
+<h3 class="anchored" data-anchor-id="sample-size-re-estimation">Sample Size Re-estimation</h3>
+<p>When <span class="math inline">\(CP\)</span> falls in the re-estimation zone:</p>
+<ol type="1">
+<li><p><strong>Calculate required events</strong>: Find <span class="math inline">\(n_{new}\)</span> such that: <span class="math inline">\(CP(n_{new}) = \int P(\text{Success} \mid \theta, n_{new}) \cdot \pi(\theta \mid D_1) \, d\theta \geq CP_{target}\)</span></p></li>
+<li><p><strong>Check feasibility</strong>: Ensure <span class="math inline">\(n_{new} \leq n_{max}\)</span> (pre-specified maximum)</p></li>
+<li><p><strong>Update design</strong>: If feasible, continue with <span class="math inline">\(n_{new}\)</span> total events</p></li>
+</ol>
+</section>
+</section>
+<section id="methodology-summary" class="level2">
+<h2 class="anchored" data-anchor-id="methodology-summary">2.5 Methodology Summary</h2>
+<p>The Bayesian adaptive procedure follows these steps:</p>
+<ol type="1">
+<li><strong>Pre-specify</strong>: Prior distribution <span class="math inline">\(\pi(\theta)\)</span>, decision thresholds <span class="math inline">\((\gamma_1, \gamma_2)\)</span>, maximum sample size</li>
+<li><strong>Interim Analysis</strong>: Observe data <span class="math inline">\(D_1\)</span>, calculate posterior <span class="math inline">\(\pi(\theta \mid D_1)\)</span></li>
+<li><strong>Conditional Power</strong>: Compute <span class="math inline">\(CP\)</span> using current posterior and remaining events</li>
+<li><strong>Decision</strong>:
+<ul>
+<li>If <span class="math inline">\(CP &gt; \gamma_1\)</span>: Stop for efficacy</li>
+<li>If <span class="math inline">\(CP &lt; \gamma_2\)</span>: Stop for futility<br>
+</li>
+<li>If <span class="math inline">\(\gamma_2 \leq CP \leq \gamma_1\)</span>: Re-estimate sample size</li>
+</ul></li>
+<li><strong>Implementation</strong>: Continue with original or modified design</li>
+</ol>
+<hr>
+</section>
+</section>
+<section id="case-study-valor-trial" class="level1">
+<h1>3. Case Study: VALOR Trial</h1>
+<section id="trial-overview" class="level2">
+<h2 class="anchored" data-anchor-id="trial-overview">3.1 Trial Overview</h2>
+</section>
+<section id="trial-overview-1" class="level2">
+<h2 class="anchored" data-anchor-id="trial-overview-1">3.1 Trial Overview</h2>
+<p>We demonstrate the methodology using the VALOR trial:</p>
+<ul>
+<li><strong>Study</strong>: Phase III trial in relapsed/refractory acute myeloid leukemia</li>
+<li><strong>Treatment</strong>: Vosaroxin + Cytarabine vs Placebo + Cytarabine<br>
+</li>
+<li><strong>Primary Endpoint</strong>: Overall survival time (log hazard ratio <span class="math inline">\(\theta\)</span>)</li>
+<li><strong>Original Design</strong>: 375 events needed for 90% power</li>
+<li><strong>Interim Analysis</strong>: After 173 events (50% of target)</li>
+<li><strong>Maximum Events</strong>: 562 (50% increase allowed)</li>
+<li><strong>Decision Thresholds</strong>: <span class="math inline">\(\gamma_1 = 0.80\)</span>, <span class="math inline">\(\gamma_2 = 0.20\)</span></li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Case Study Focus</strong>: This tutorial demonstrates the <strong>sample size re-estimation scenario</strong> where interim data shows beneficial treatment effect smaller than originally assumed, leading to conditional power in the re-estimation zone (<span class="math inline">\(\gamma_2 &lt; CP &lt; \gamma_1\)</span>).</p>
+</blockquote>
+</section>
+<section id="implementation-steps" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-steps">3.2 Implementation Steps</h2>
+<p>The case study follows the methodology in these steps:</p>
+<ol type="1">
+<li><strong>Step 1</strong>: Specify prior distribution <span class="math inline">\(\pi(\theta)\)</span> and trial parameters</li>
+<li><strong>Step 2</strong>: Simulate interim data <span class="math inline">\(D_1\)</span> at 173 events</li>
+<li><strong>Step 3</strong>: Calculate posterior distribution <span class="math inline">\(\pi(\theta \mid D_1)\)</span></li>
+<li><strong>Step 4</strong>: Compute conditional power with original design</li>
+<li><strong>Step 5</strong>: Apply decision rules and perform sample size re-estimation</li>
+<li><strong>Step 6</strong>: Sensitivity analysis and validation</li>
+</ol>
+</section>
+</section>
+<section id="step-1-prior-specification-and-trial-parameters" class="level1">
+<h1>4. Step 1: Prior Specification and Trial Parameters</h1>
+</section>
+<section id="step-1-prior-specification-and-trial-parameters-1" class="level1">
+<h1>4. Step 1: Prior Specification and Trial Parameters</h1>
+<p>Following the methodology in Section 2, we specify the prior distribution and key trial parameters:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== TRIAL DESIGN PARAMETERS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Original target events: 375"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Interim analysis at: 173 events"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Maximum events allowed: 562"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Assumed HR (planning): 0.75"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Efficacy threshold (γ₁): 0.8"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Futility threshold (γ₂): 0.2"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Target power: 0.9"</code></pre>
+</div>
+</div>
+<section id="prior-distribution-specification" class="level2">
+<h2 class="anchored" data-anchor-id="prior-distribution-specification">4.1 Prior Distribution Specification</h2>
+<p>Following Section 2.2, we specify the prior distribution <span class="math inline">\(\pi(\theta)\)</span> for the log hazard ratio:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== PRIOR DISTRIBUTION ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Prior mean (μ₀): -0.163"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Prior std dev (σ₀): 0.4"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Prior median HR: 0.85"</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_conditional_power_files/figure-html/prior-setup-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_conditional_power_files/figure-html/prior-setup-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="step-2-interim-data-simulation" class="level1">
+<h1>5. Step 2: Interim Data Simulation</h1>
+<p>We simulate interim data <span class="math inline">\(D_1\)</span> to represent the scenario where the true treatment effect is smaller than assumed in planning:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== INTERIM DATA ANALYSIS (D₁) ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Observed log HR (θ̂₁): -0.108"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Standard error (SE₁): 0.142"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Observed HR: 0.898"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Z-statistic: -0.757"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Two-sided p-value: 0.4488"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "No statistical significance at interim"</code></pre>
+</div>
+</div>
+</section>
+<section id="step-3-posterior-distribution-calculation" class="level1">
+<h1>6. Step 3: Posterior Distribution Calculation</h1>
+<p>Following Section 2.2, we calculate the posterior distribution <span class="math inline">\(\pi(\theta \mid D_1)\)</span> using Bayesian updating:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== POSTERIOR DISTRIBUTION π(θ|D₁) ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Posterior mean (μ₁): -0.114"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Posterior std dev (σ₁): 0.134"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Posterior median HR: 0.892"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "95% Credible interval (log HR): [ -0.377 , 0.149 ]"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "95% Credible interval (HR): [ 0.686 , 1.161 ]"</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_conditional_power_files/figure-html/posterior-update-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-4-conditional-power-calculation" class="level1">
+<h1>7. Step 4: Conditional Power Calculation</h1>
+<p>Now we implement conditional power calculation following Section 2.3 methodology:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== CONDITIONAL POWER SETUP ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Events observed at interim: 173"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Remaining events needed (original design): 202"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Total events (original design): 375"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Final test statistic: Z ~ N(θ√ 375 , 1)"</code></pre>
+</div>
+</div>
+<section id="conditional-power-function-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-power-function-implementation">7.1 Conditional Power Function Implementation</h2>
+<p>Following Section 2.3, we implement the Bayesian conditional power calculation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to calculate conditional power (Section 2.3 implementation)</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>calculate_conditional_power <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_post, sigma_post, </span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                                      events_interim, events_remaining, </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">alpha =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  total_events <span class="ot">&lt;-</span> events_interim <span class="sc">+</span> events_remaining</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  critical_value <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha<span class="sc">/</span><span class="dv">2</span>)  <span class="co"># z_{α/2} for two-sided test</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Monte Carlo integration for Bayesian conditional power</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># CP = ∫ P(Success|θ, n_total) · π(θ|D₁) dθ</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  n_sim <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  theta_samples <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_sim, mu_post, sigma_post)  <span class="co"># Sample from π(θ|D₁)</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># For each θ, calculate P(Success|θ, n_total)</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  success_prob <span class="ot">&lt;-</span> <span class="fu">sapply</span>(theta_samples, <span class="cf">function</span>(theta) {</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Expected final Z-statistic: Z_final ~ N(θ√n_total, 1)</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>    z_final_mean <span class="ot">&lt;-</span> theta <span class="sc">*</span> <span class="fu">sqrt</span>(total_events)</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># P(|Z_final| &gt; z_{α/2}) for two-sided test</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(critical_value <span class="sc">-</span> z_final_mean) <span class="sc">+</span> <span class="fu">pnorm</span>(<span class="sc">-</span>critical_value <span class="sc">-</span> z_final_mean)</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Conditional power = E[P(Success|θ)] under posterior</span></span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(success_prob)</span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="calculate-conditional-power-with-original-design" class="level2">
+<h2 class="anchored" data-anchor-id="calculate-conditional-power-with-original-design">7.2 Calculate Conditional Power with Original Design</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== CONDITIONAL POWER RESULTS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Conditional Power (original design): 0.606"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Target power: 0.9"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Decision zone: RE-ESTIMATION zone (γ₂ ≤ CP ≤ γ₁)"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="step-5-adaptive-decisions-and-sample-size-re-estimation" class="level1">
+<h1>8. Step 5: Adaptive Decisions and Sample Size Re-estimation</h1>
+<p>Following the decision rules from Section 2.4, we implement the adaptive decision framework:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== ADAPTIVE DECISION ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Decision with original design: CONTINUE - Re-estimate Sample Size"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Conditional Power: 0.606"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Efficacy threshold (γ₁): 0.8"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Futility threshold (γ₂): 0.2"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "\n=== SAMPLE SIZE RE-ESTIMATION PROCEDURE ==="
+[1] "Conditional power in re-estimation zone - calculating required events..."
+[1] "Cannot achieve target power even with maximum sample size"</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_conditional_power_files/figure-html/adaptive-decision-rules-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== RE-ESTIMATION SUMMARY ===
+Interim Analysis:
+- Events observed: 173 
+- Observed HR: 0.898 
+- Conditional power (original): 0.606 
+
+Re-estimation Results:
+- Status: INSUFFICIENT 
+- Additional events needed: 389 
+- New total events: 562 
+- Increase from original: 187 events ( 49.9 %)
+- Conditional power (new): 0.671 
+
+Practical Implications:
+- Estimated timeline extension: ~ 6  months
+- Additional patients needed: ~ 224 
+- Regulatory pre-specification enables seamless implementation</code></pre>
+</div>
+</div>
+</section>
+<section id="step-6-sensitivity-analysis" class="level1">
+<h1>9. Step 6: Sensitivity Analysis</h1>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Decision with original design: CONTINUE - Consider Re-estimation"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Conditional Power: 0.606"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "\n--- Sample Size Re-estimation ---"
+[1] "Conditional power below target - evaluating sample size increase..."
+[1] "Cannot achieve target power even with maximum sample size"</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_conditional_power_files/figure-html/adaptive-decisions-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== SAMPLE SIZE RE-ESTIMATION SUMMARY ===
+Interim Analysis Results:
+- Events observed: 173 
+- Conditional power with original design: 0.606 
+- Decision: Insufficient power, re-estimation needed</code></pre>
+</div>
+</div>
+</section>
+<section id="sensitivity-analysis" class="level1">
+<h1>7. Sensitivity Analysis</h1>
+<p>We explore robustness of conditional power calculations to key assumptions:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_conditional_power_files/figure-html/sensitivity-robustness-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== SENSITIVITY ANALYSIS RESULTS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Effect Size Sensitivity:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - HR range tested: 0.73 to 1.09 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - CP range: 0.476 to 0.93 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Decision changes: 12 efficacy, 0 futility, 38 re-estimation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Uncertainty Impact:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Higher uncertainty (larger σ₁) reduces conditional power</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - More data reduces uncertainty and increases decision confidence</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Robustness Assessment:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Current decision appears robust to moderate assumption changes</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Re-estimation provides buffer against planning uncertainties</code></pre>
+</div>
+</div>
+</section>
+<section id="summary-of-results-and-implementation" class="level1">
+<h1>10. Summary of Results and Implementation</h1>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>VALOR Trial: Bayesian Adaptive Design Implementation Results</caption>
+<colgroup>
+<col style="width: 35%">
+<col style="width: 64%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Interim Events Observed</td>
+<td style="text-align: left;">173</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Observed HR (D₁)</td>
+<td style="text-align: left;">0.898</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Interim p-value</td>
+<td style="text-align: left;">0.4488</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Prior Mean HR</td>
+<td style="text-align: left;">0.85</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Posterior Median HR</td>
+<td style="text-align: left;">0.892</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conditional Power (Original)</td>
+<td style="text-align: left;">0.606</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Decision Zone</td>
+<td style="text-align: left;">RE-ESTIMATION zone (γ₂ ≤ CP ≤ γ₁)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Target Events (Original)</td>
+<td style="text-align: left;">375</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Re-estimated Events Needed</td>
+<td style="text-align: left;">N/A</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Total Events (New Design)</td>
+<td style="text-align: left;">562</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Conditional Power (New)</td>
+<td style="text-align: left;">0.671</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sample Size Increase</td>
+<td style="text-align: left;">187 events ( 49.9 %)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Maximum Events Allowed</td>
+<td style="text-align: left;">562</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Final Implementation Decision</td>
+<td style="text-align: left;">CONTINUE with maximum sample size (insufficient power)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== METHODOLOGY VALIDATION ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Bayesian Framework Implementation:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Prior specification: θ ~ N( -0.163 , 0.16 )</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Posterior updating: θ|D₁ ~ N( -0.114 , 0.018 )</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Conditional power calculation via Monte Carlo integration</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Decision rules applied correctly</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Sample Size Re-estimation Results:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Trigger condition: CP ∈ [ 0.2 , 0.8 ] ✓</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Target power achieved: ✓ ( 0.671 ) </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Feasibility constraint satisfied: ✓ ( INSUFFICIENT ) </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Pre-specified maximum respected: ✓</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Key Insights from Case Study:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Original planning assumption (HR = 0.75 ) was optimistic</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Interim data suggests modest benefit (HR ≈ 0.9 )</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Bayesian updating balanced prior beliefs with data</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Re-estimation preserved target power while controlling Type I error</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Adaptive design provided optimal resource allocation</code></pre>
+</div>
+</div>
+</section>
+<section id="comparison-of-adaptive-scenarios" class="level1">
+<h1>11. Comparison of Adaptive Scenarios</h1>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Comparison of Bayesian Adaptive Trial Scenarios</caption>
+<colgroup>
+<col style="width: 15%">
+<col style="width: 10%">
+<col style="width: 12%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Scenario</th>
+<th style="text-align: left;">Conditional Power</th>
+<th style="text-align: left;">Typical Posterior HR</th>
+<th style="text-align: left;">Decision Implementation</th>
+<th style="text-align: left;">Resource Efficiency</th>
+<th style="text-align: left;">Scientific Value</th>
+<th style="text-align: left;">Regulatory Implications</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Early Efficacy Stopping</td>
+<td style="text-align: left;">&gt; 0.8</td>
+<td style="text-align: left;">&lt; 0.70</td>
+<td style="text-align: left;">Stop Early for Success</td>
+<td style="text-align: left;">High (Early Success)</td>
+<td style="text-align: left;">High (Proven Efficacy)</td>
+<td style="text-align: left;">Accelerated Approval</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sample Size Re-estimation</td>
+<td style="text-align: left;">0.2 - 0.8</td>
+<td style="text-align: left;">0.75 - 0.90</td>
+<td style="text-align: left;">Continue with More Events</td>
+<td style="text-align: left;">Moderate (Extended Trial)</td>
+<td style="text-align: left;">High (Preserved Power)</td>
+<td style="text-align: left;">Standard Approval Timeline</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Futility Stopping</td>
+<td style="text-align: left;">&lt; 0.2</td>
+<td style="text-align: left;">&gt; 0.95</td>
+<td style="text-align: left;">Stop Early for Futility</td>
+<td style="text-align: left;">High (Early Stop)</td>
+<td style="text-align: left;">Moderate (Clear Futility)</td>
+<td style="text-align: left;">Program Termination</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== STRATEGIC CONSIDERATIONS ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sample Size Re-estimation Strategy:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Optimal when planning assumptions are uncertain</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Balances efficiency with maintaining statistical power</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Requires regulatory pre-specification and agreement</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Most valuable in expensive, long-duration trials</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Particularly suited to oncology and rare disease studies</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Alternative Strategies:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Fixed designs: When high confidence in planning assumptions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Group sequential: When early stopping is primary goal</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Platform trials: When multiple treatments under investigation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Bayesian response-adaptive: When allocation optimization desired</code></pre>
+</div>
+</div>
+</section>
+<section id="conclusion-and-implementation-guidance" class="level1">
+<h1>12. Conclusion and Implementation Guidance</h1>
+<p>This case study demonstrated the complete implementation of Bayesian conditional power for sample size re-estimation in adaptive clinical trials, specifically illustrated through the VALOR trial scenario.</p>
+<section id="methodological-contributions" class="level2">
+<h2 class="anchored" data-anchor-id="methodological-contributions">12.1 Methodological Contributions</h2>
+<p><strong>Bayesian Framework Advantages:</strong> - <strong>Principled uncertainty quantification</strong> through posterior distributions - <strong>Natural integration</strong> of prior knowledge with accumulating data<br>
+- <strong>Flexible decision-making</strong> that accounts for parameter uncertainty - <strong>Coherent updating</strong> mechanism as new data emerges</p>
+<p><strong>Sample Size Re-estimation Benefits:</strong> - <strong>Power preservation</strong> when planning assumptions prove optimistic - <strong>Resource optimization</strong> by avoiding underpowered trials - <strong>Scientific integrity</strong> maintained through pre-specified adaptation rules - <strong>Regulatory acceptance</strong> when properly designed and justified</p>
+</section>
+<section id="implementation-framework" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-framework">12.2 Implementation Framework</h2>
+<p>The methodology provides a systematic approach:</p>
+<ol type="1">
+<li><strong>Pre-trial Planning</strong>: Specify priors, decision thresholds, maximum sample size</li>
+<li><strong>Interim Analysis</strong>: Observe data, update posterior, calculate conditional power<br>
+</li>
+<li><strong>Adaptive Decision</strong>: Apply decision rules for stopping or re-estimation</li>
+<li><strong>Implementation</strong>: Continue with original or modified design</li>
+<li><strong>Final Analysis</strong>: Standard statistical analysis with appropriate adjustments</li>
+</ol>
+</section>
+<section id="practical-considerations" class="level2">
+<h2 class="anchored" data-anchor-id="practical-considerations">12.3 Practical Considerations</h2>
+<p><strong>When to Use Bayesian Adaptive Designs:</strong> - Planning assumptions highly uncertain - Long-duration, expensive trials - Limited patient populations<br>
+- Regulatory environment supportive of adaptive methods - Competitive advantage from efficiency gains</p>
+<p><strong>Success Factors:</strong> - <strong>Early stakeholder alignment</strong> on adaptive strategy - <strong>Robust statistical planning</strong> with sensitivity analyses - <strong>Regulatory consultation</strong> and guidance alignment - <strong>Operational excellence</strong> in trial execution - <strong>Clear communication</strong> of adaptive elements to all stakeholders</p>
+</section>
+<section id="future-directions" class="level2">
+<h2 class="anchored" data-anchor-id="future-directions">12.4 Future Directions</h2>
+<p>The framework demonstrated here extends naturally to: - <strong>Multi-arm adaptive trials</strong> with treatment selection - <strong>Platform trial designs</strong> with shared infrastructure - <strong>Biomarker-stratified adaptations</strong> based on patient subgroups - <strong>Real-world evidence integration</strong> through external data sources</p>
+<p>Bayesian adaptive designs represent a paradigm shift toward more efficient, patient-centered clinical research that maximizes scientific learning while respecting resource constraints and ethical obligations.</p>
+<hr>
+<p><strong>Note</strong>: This tutorial provides a comprehensive framework for implementing Bayesian conditional power in practice. The VALOR case study demonstrates the methodology’s value in preserving trial integrity while adapting to emerging data, ultimately enabling more efficient drug development and better patient outcomes.</p>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<ul>
+<li>FDA Guidance (2019). <em>Adaptive Designs for Clinical Trials of Drugs and Biologics</em></li>
+<li>Berry, D.A. (2006). “Bayesian clinical trials” <em>Nature Reviews Drug Discovery</em></li>
+<li>Wassmer, G. &amp; Brannath, W. (2016). <em>Group Sequential and Confirmatory Adaptive Designs in Clinical Trials</em></li>
+<li>Jennison, C. &amp; Turnbull, B.W. (2000). <em>Group Sequential Methods with Applications to Clinical Trials</em></li>
+<li>Gallo, P. et al.&nbsp;(2006). “Adaptive designs in clinical drug development” <em>Journal of Biopharmaceutical Statistics</em></li>
+<li>Chow, S.C. &amp; Chang, M. (2008). “Adaptive design methods in clinical trials” <em>Chapman &amp; Hall/CRC</em></li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

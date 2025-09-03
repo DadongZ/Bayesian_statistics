@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dadong Zhang">
+<meta name="dcterms.date" content="2025-08-26">
+
+<title>Frequentist Adaptive Design: Conditional Power and Sample Size Re-estimation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Frequentist_combination_power_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Frequentist_combination_power_files/libs/quarto-html/quarto.js"></script>
+<script src="Frequentist_combination_power_files/libs/quarto-html/popper.min.js"></script>
+<script src="Frequentist_combination_power_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Frequentist_combination_power_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Frequentist_combination_power_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Frequentist_combination_power_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Frequentist_combination_power_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Frequentist_combination_power_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Frequentist_combination_power_files/libs/bootstrap/bootstrap-10daa034703793678e481cc8cee6d76f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">2. Methodology</a>
+  <ul class="collapse">
+  <li><a href="#frequentist-conditional-power-framework" id="toc-frequentist-conditional-power-framework" class="nav-link" data-scroll-target="#frequentist-conditional-power-framework">2.1 Frequentist Conditional Power Framework</a>
+  <ul class="collapse">
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition">Definition</a></li>
+  <li><a href="#key-philosophical-distinction" id="toc-key-philosophical-distinction" class="nav-link" data-scroll-target="#key-philosophical-distinction">Key Philosophical Distinction</a></li>
+  </ul></li>
+  <li><a href="#frequentist-conditional-power-approaches" id="toc-frequentist-conditional-power-approaches" class="nav-link" data-scroll-target="#frequentist-conditional-power-approaches">2.2 Frequentist Conditional Power Approaches</a>
+  <ul class="collapse">
+  <li><a href="#approach-1-maximum-likelihood-estimation-mle" id="toc-approach-1-maximum-likelihood-estimation-mle" class="nav-link" data-scroll-target="#approach-1-maximum-likelihood-estimation-mle">Approach 1: Maximum Likelihood Estimation (MLE)</a></li>
+  <li><a href="#approach-2-conservative-lower-bound" id="toc-approach-2-conservative-lower-bound" class="nav-link" data-scroll-target="#approach-2-conservative-lower-bound">Approach 2: Conservative Lower Bound</a></li>
+  <li><a href="#approach-3-design-assumption" id="toc-approach-3-design-assumption" class="nav-link" data-scroll-target="#approach-3-design-assumption">Approach 3: Design Assumption</a></li>
+  <li><a href="#approach-4-minimum-clinically-relevant-effect" id="toc-approach-4-minimum-clinically-relevant-effect" class="nav-link" data-scroll-target="#approach-4-minimum-clinically-relevant-effect">Approach 4: Minimum Clinically Relevant Effect</a></li>
+  </ul></li>
+  <li><a href="#mathematical-formulation" id="toc-mathematical-formulation" class="nav-link" data-scroll-target="#mathematical-formulation">2.3 Mathematical Formulation</a>
+  <ul class="collapse">
+  <li><a href="#test-statistic-distribution" id="toc-test-statistic-distribution" class="nav-link" data-scroll-target="#test-statistic-distribution">Test Statistic Distribution</a></li>
+  <li><a href="#conditional-power-formula" id="toc-conditional-power-formula" class="nav-link" data-scroll-target="#conditional-power-formula">Conditional Power Formula</a></li>
+  <li><a href="#information-fraction-adjustment" id="toc-information-fraction-adjustment" class="nav-link" data-scroll-target="#information-fraction-adjustment">Information Fraction Adjustment</a></li>
+  </ul></li>
+  <li><a href="#sample-size-re-estimation-framework" id="toc-sample-size-re-estimation-framework" class="nav-link" data-scroll-target="#sample-size-re-estimation-framework">2.4 Sample Size Re-estimation Framework</a>
+  <ul class="collapse">
+  <li><a href="#decision-thresholds" id="toc-decision-thresholds" class="nav-link" data-scroll-target="#decision-thresholds">Decision Thresholds</a></li>
+  <li><a href="#re-estimation-procedure" id="toc-re-estimation-procedure" class="nav-link" data-scroll-target="#re-estimation-procedure">Re-estimation Procedure</a></li>
+  <li><a href="#type-i-error-control" id="toc-type-i-error-control" class="nav-link" data-scroll-target="#type-i-error-control">Type I Error Control</a></li>
+  </ul></li>
+  <li><a href="#comparative-advantages-and-limitations" id="toc-comparative-advantages-and-limitations" class="nav-link" data-scroll-target="#comparative-advantages-and-limitations">2.5 Comparative Advantages and Limitations</a>
+  <ul class="collapse">
+  <li><a href="#advantages" id="toc-advantages" class="nav-link" data-scroll-target="#advantages">Advantages</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#case-study-valor-trial" id="toc-case-study-valor-trial" class="nav-link" data-scroll-target="#case-study-valor-trial">3. Case Study: VALOR Trial</a>
+  <ul class="collapse">
+  <li><a href="#trial-overview" id="toc-trial-overview" class="nav-link" data-scroll-target="#trial-overview">3.1 Trial Overview</a></li>
+  <li><a href="#implementation-steps" id="toc-implementation-steps" class="nav-link" data-scroll-target="#implementation-steps">3.2 Implementation Steps</a></li>
+  </ul></li>
+  <li><a href="#step-1-trial-design-and-effect-assumptions" id="toc-step-1-trial-design-and-effect-assumptions" class="nav-link" data-scroll-target="#step-1-trial-design-and-effect-assumptions">4. Step 1: Trial Design and Effect Assumptions</a>
+  <ul class="collapse">
+  <li><a href="#effect-size-assumption-framework" id="toc-effect-size-assumption-framework" class="nav-link" data-scroll-target="#effect-size-assumption-framework">4.1 Effect Size Assumption Framework</a></li>
+  </ul></li>
+  <li><a href="#step-2-interim-data-simulation" id="toc-step-2-interim-data-simulation" class="nav-link" data-scroll-target="#step-2-interim-data-simulation">5. Step 2: Interim Data Simulation</a></li>
+  <li><a href="#step-3-complete-effect-assumption-framework" id="toc-step-3-complete-effect-assumption-framework" class="nav-link" data-scroll-target="#step-3-complete-effect-assumption-framework">6. Step 3: Complete Effect Assumption Framework</a></li>
+  <li><a href="#step-4-frequentist-conditional-power-calculation" id="toc-step-4-frequentist-conditional-power-calculation" class="nav-link" data-scroll-target="#step-4-frequentist-conditional-power-calculation">7. Step 4: Frequentist Conditional Power Calculation</a>
+  <ul class="collapse">
+  <li><a href="#calculate-conditional-power-for-all-approaches" id="toc-calculate-conditional-power-for-all-approaches" class="nav-link" data-scroll-target="#calculate-conditional-power-for-all-approaches">7.1 Calculate Conditional Power for All Approaches</a></li>
+  <li><a href="#visualization-of-conditional-power-results" id="toc-visualization-of-conditional-power-results" class="nav-link" data-scroll-target="#visualization-of-conditional-power-results">7.2 Visualization of Conditional Power Results</a></li>
+  </ul></li>
+  <li><a href="#step-5-sample-size-re-estimation" id="toc-step-5-sample-size-re-estimation" class="nav-link" data-scroll-target="#step-5-sample-size-re-estimation">8. Step 5: Sample Size Re-estimation</a>
+  <ul class="collapse">
+  <li><a href="#re-estimation-visualization" id="toc-re-estimation-visualization" class="nav-link" data-scroll-target="#re-estimation-visualization">8.1 Re-estimation Visualization</a></li>
+  </ul></li>
+  <li><a href="#step-6-sensitivity-analysis-and-robustness" id="toc-step-6-sensitivity-analysis-and-robustness" class="nav-link" data-scroll-target="#step-6-sensitivity-analysis-and-robustness">9. Step 6: Sensitivity Analysis and Robustness</a></li>
+  <li><a href="#comprehensive-results-summary" id="toc-comprehensive-results-summary" class="nav-link" data-scroll-target="#comprehensive-results-summary">10. Comprehensive Results Summary</a></li>
+  <li><a href="#implementation-guidance-and-best-practices" id="toc-implementation-guidance-and-best-practices" class="nav-link" data-scroll-target="#implementation-guidance-and-best-practices">11. Implementation Guidance and Best Practices</a></li>
+  <li><a href="#comparison-framework-and-future-directions" id="toc-comparison-framework-and-future-directions" class="nav-link" data-scroll-target="#comparison-framework-and-future-directions">12. Comparison Framework and Future Directions</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a>
+  <ul class="collapse">
+  <li><a href="#key-methodological-features" id="toc-key-methodological-features" class="nav-link" data-scroll-target="#key-methodological-features">Key Methodological Features</a></li>
+  <li><a href="#implementation-insights-from-valor-case-study" id="toc-implementation-insights-from-valor-case-study" class="nav-link" data-scroll-target="#implementation-insights-from-valor-case-study">Implementation Insights from VALOR Case Study</a></li>
+  <li><a href="#strategic-implementation-framework" id="toc-strategic-implementation-framework" class="nav-link" data-scroll-target="#strategic-implementation-framework">Strategic Implementation Framework</a></li>
+  <li><a href="#future-methodological-evolution" id="toc-future-methodological-evolution" class="nav-link" data-scroll-target="#future-methodological-evolution">Future Methodological Evolution</a></li>
+  <li><a href="#concluding-perspective" id="toc-concluding-perspective" class="nav-link" data-scroll-target="#concluding-perspective">Concluding Perspective</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Frequentist Adaptive Design: Conditional Power and Sample Size Re-estimation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dadong Zhang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 26, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Adaptive trial designs enable planned modifications to ongoing studies based on accumulating data while preserving statistical validity. <strong>Conditional power</strong> in the frequentist framework provides a classical approach to evaluate the probability of trial success given interim data and fixed assumptions about treatment effects, guiding decisions on early stopping or sample size re-estimation.</p>
+<p>This tutorial demonstrates the theoretical foundation and practical implementation of frequentist conditional power through the VALOR trial case study, specifically focusing on <strong>sample size re-estimation</strong> when interim data suggest the original design assumptions may require adjustment.</p>
+</section>
+<section id="methodology" class="level1">
+<h1>2. Methodology</h1>
+<section id="frequentist-conditional-power-framework" class="level2">
+<h2 class="anchored" data-anchor-id="frequentist-conditional-power-framework">2.1 Frequentist Conditional Power Framework</h2>
+<section id="definition" class="level3">
+<h3 class="anchored" data-anchor-id="definition">Definition</h3>
+<p>Frequentist conditional power calculates the probability that a trial will ultimately demonstrate statistical significance, given the observed interim data and a <strong>fixed assumption</strong> about the true treatment effect.</p>
+<p>Mathematically, conditional power at interim analysis is: <span class="math display">\[CP(\theta) = P(\text{Reject } H_0 \text{ at final analysis} \mid \text{Interim data } D_1, \theta)\]</span></p>
+<p>where <span class="math inline">\(\theta\)</span> represents a <strong>fixed, unknown parameter</strong> rather than a random variable.</p>
+</section>
+<section id="key-philosophical-distinction" class="level3">
+<h3 class="anchored" data-anchor-id="key-philosophical-distinction">Key Philosophical Distinction</h3>
+<p>Unlike Bayesian approaches that treat the treatment effect as a random variable with a posterior distribution, the frequentist framework:</p>
+<ul>
+<li><strong>Treats <span class="math inline">\(\theta\)</span> as fixed but unknown</strong></li>
+<li><strong>Requires explicit specification</strong> of the treatment effect assumption</li>
+<li><strong>Provides conditional probability statements</strong> given specific parameter values</li>
+<li><strong>Does not formally incorporate prior information</strong></li>
+</ul>
+</section>
+</section>
+<section id="frequentist-conditional-power-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="frequentist-conditional-power-approaches">2.2 Frequentist Conditional Power Approaches</h2>
+<section id="approach-1-maximum-likelihood-estimation-mle" class="level3">
+<h3 class="anchored" data-anchor-id="approach-1-maximum-likelihood-estimation-mle">Approach 1: Maximum Likelihood Estimation (MLE)</h3>
+<p>Use the observed treatment effect from interim data as the assumed true effect: <span class="math display">\[\hat{\theta}_{MLE} = \hat{\theta}_1\]</span></p>
+<p><strong>Advantages</strong>: Data-driven, reflects current evidence <strong>Disadvantages</strong>: May be overly optimistic due to interim variability</p>
+</section>
+<section id="approach-2-conservative-lower-bound" class="level3">
+<h3 class="anchored" data-anchor-id="approach-2-conservative-lower-bound">Approach 2: Conservative Lower Bound</h3>
+<p>Use the lower confidence limit of the interim treatment effect: <span class="math display">\[\hat{\theta}_{conservative} = \hat{\theta}_1 - z_{\alpha/2} \cdot SE_1\]</span></p>
+<p><strong>Advantages</strong>: Accounts for uncertainty in interim estimate <strong>Disadvantages</strong>: May be overly pessimistic</p>
+</section>
+<section id="approach-3-design-assumption" class="level3">
+<h3 class="anchored" data-anchor-id="approach-3-design-assumption">Approach 3: Design Assumption</h3>
+<p>Use the original planning assumption, independent of interim data: <span class="math display">\[\theta_{design} = \theta_{planned}\]</span></p>
+<p><strong>Advantages</strong>: Consistent with original power calculation <strong>Disadvantages</strong>: Ignores interim evidence</p>
+</section>
+<section id="approach-4-minimum-clinically-relevant-effect" class="level3">
+<h3 class="anchored" data-anchor-id="approach-4-minimum-clinically-relevant-effect">Approach 4: Minimum Clinically Relevant Effect</h3>
+<p>Use the smallest effect size considered clinically meaningful: <span class="math display">\[\theta_{min} = \text{minimum worthwhile effect}\]</span></p>
+<p><strong>Advantages</strong>: Ensures power for meaningful effects <strong>Disadvantages</strong>: May be too conservative</p>
+</section>
+</section>
+<section id="mathematical-formulation" class="level2">
+<h2 class="anchored" data-anchor-id="mathematical-formulation">2.3 Mathematical Formulation</h2>
+<section id="test-statistic-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="test-statistic-distribution">Test Statistic Distribution</h3>
+<p>For survival trials with information-based design, the final test statistic follows: <span class="math display">\[Z_{final} = \frac{\hat{\theta}_{final}}{\text{SE}_{final}} \sim N\left(\frac{\theta}{\text{SE}_{final}}, 1\right)\]</span></p>
+<p>With total information <span class="math inline">\(I_{total} = n_{total}\)</span> events: <span class="math display">\[Z_{final} \sim N(\theta\sqrt{n_{total}}, 1)\]</span></p>
+</section>
+<section id="conditional-power-formula" class="level3">
+<h3 class="anchored" data-anchor-id="conditional-power-formula">Conditional Power Formula</h3>
+<p>For a two-sided test with significance level <span class="math inline">\(\alpha\)</span>: <span class="math display">\[CP(\theta) = P(|Z_{final}| &gt; z_{\alpha/2} \mid D_1, \theta)\]</span></p>
+<p><span class="math display">\[= \Phi\left(\frac{\theta\sqrt{n_{total}} - z_{\alpha/2}}{1}\right) + \Phi\left(\frac{-\theta\sqrt{n_{total}} - z_{\alpha/2}}{1}\right)\]</span></p>
+<p>For one-sided alternative (more common in practice): <span class="math display">\[CP(\theta) = \Phi(\theta\sqrt{n_{total}} - z_{\alpha})\]</span></p>
+</section>
+<section id="information-fraction-adjustment" class="level3">
+<h3 class="anchored" data-anchor-id="information-fraction-adjustment">Information Fraction Adjustment</h3>
+<p>When interim analysis uses partial information: <span class="math display">\[I_1 = n_{interim}, \quad I_{total} = n_{interim} + n_{remaining}\]</span></p>
+<p>The conditional power becomes: <span class="math display">\[CP(\theta) = \Phi\left(\theta\sqrt{n_{total}} - z_{\alpha}\right)\]</span></p>
+<p>where the observed interim data provides the evidence for choosing <span class="math inline">\(\theta\)</span>.</p>
+</section>
+</section>
+<section id="sample-size-re-estimation-framework" class="level2">
+<h2 class="anchored" data-anchor-id="sample-size-re-estimation-framework">2.4 Sample Size Re-estimation Framework</h2>
+<section id="decision-thresholds" class="level3">
+<h3 class="anchored" data-anchor-id="decision-thresholds">Decision Thresholds</h3>
+<p>Define operational boundaries: - <strong>Efficacy threshold</strong> <span class="math inline">\(\gamma_1\)</span>: Stop for efficacy if <span class="math inline">\(CP(\theta) &gt; \gamma_1\)</span> - <strong>Futility threshold</strong> <span class="math inline">\(\gamma_2\)</span>: Stop for futility if <span class="math inline">\(CP(\theta) &lt; \gamma_2\)</span> - <strong>Re-estimation zone</strong>: <span class="math inline">\(\gamma_2 \leq CP(\theta) \leq \gamma_1\)</span></p>
+</section>
+<section id="re-estimation-procedure" class="level3">
+<h3 class="anchored" data-anchor-id="re-estimation-procedure">Re-estimation Procedure</h3>
+<p>When conditional power falls in the re-estimation zone:</p>
+<ol type="1">
+<li><strong>Select effect assumption</strong>: Choose <span class="math inline">\(\theta\)</span> based on one of the approaches in Section 2.2</li>
+<li><strong>Calculate required sample size</strong>: Find <span class="math inline">\(n_{new}\)</span> such that: <span class="math display">\[CP(\theta, n_{new}) = \Phi(\theta\sqrt{n_{new}} - z_{\alpha}) \geq CP_{target}\]</span></li>
+<li><strong>Solve for <span class="math inline">\(n_{new}\)</span></strong>: <span class="math display">\[n_{new} = \left(\frac{\Phi^{-1}(CP_{target}) + z_{\alpha}}{\theta}\right)^2\]</span></li>
+<li><strong>Check feasibility</strong>: Ensure <span class="math inline">\(n_{new} \leq n_{max}\)</span></li>
+<li><strong>Implement decision</strong>: Continue with original or modified sample size</li>
+</ol>
+</section>
+<section id="type-i-error-control" class="level3">
+<h3 class="anchored" data-anchor-id="type-i-error-control">Type I Error Control</h3>
+<p>Frequentist conditional power naturally preserves Type I error rate when: - <strong>Pre-specification</strong>: All adaptation rules specified before trial start - <strong>Unchanged hypotheses</strong>: Primary endpoints and significance levels remain fixed - <strong>Information-based design</strong>: Sample size modifications based on event counts, not effect estimates</p>
+<p>The key insight is that <strong>conditional power calculations do not use the test statistic</strong> for the final hypothesis test, avoiding inflation of Type I error.</p>
+</section>
+</section>
+<section id="comparative-advantages-and-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="comparative-advantages-and-limitations">2.5 Comparative Advantages and Limitations</h2>
+<section id="advantages" class="level3">
+<h3 class="anchored" data-anchor-id="advantages">Advantages</h3>
+<ul>
+<li><strong>Computational simplicity</strong>: Direct analytical formulas</li>
+<li><strong>Regulatory acceptance</strong>: Well-established precedent</li>
+<li><strong>Transparent assumptions</strong>: Explicit effect size specifications</li>
+<li><strong>Objective interpretation</strong>: No subjective prior specification required</li>
+</ul>
+</section>
+<section id="limitations" class="level3">
+<h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
+<ul>
+<li><strong>Single-point estimates</strong>: No natural uncertainty quantification</li>
+<li><strong>Assumption dependency</strong>: Results highly sensitive to chosen <span class="math inline">\(\theta\)</span></li>
+<li><strong>Prior information</strong>: Cannot formally incorporate historical data</li>
+<li><strong>Conservative nature</strong>: Often requires sensitivity analysis across multiple scenarios</li>
+</ul>
+<hr>
+</section>
+</section>
+</section>
+<section id="case-study-valor-trial" class="level1">
+<h1>3. Case Study: VALOR Trial</h1>
+<section id="trial-overview" class="level2">
+<h2 class="anchored" data-anchor-id="trial-overview">3.1 Trial Overview</h2>
+<p>We demonstrate frequentist conditional power methodology using the same VALOR trial design for direct comparison with Bayesian approaches:</p>
+<ul>
+<li><strong>Study</strong>: Phase III trial in relapsed/refractory acute myeloid leukemia</li>
+<li><strong>Treatment</strong>: Vosaroxin + Cytarabine vs Placebo + Cytarabine<br>
+</li>
+<li><strong>Primary Endpoint</strong>: Overall survival time (log hazard ratio <span class="math inline">\(\theta\)</span>)</li>
+<li><strong>Original Design</strong>: 375 events needed for 90% power at HR = 0.75</li>
+<li><strong>Interim Analysis</strong>: After 173 events (46% of target events)</li>
+<li><strong>Maximum Events</strong>: 562 (50% increase allowed)</li>
+<li><strong>Decision Thresholds</strong>: <span class="math inline">\(\gamma_1 = 0.80\)</span>, <span class="math inline">\(\gamma_2 = 0.20\)</span></li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Case Study Focus</strong>: This tutorial demonstrates <strong>frequentist sample size re-estimation</strong> when interim data suggest different treatment effects than originally assumed, requiring conditional power calculations under multiple effect size scenarios.</p>
+</blockquote>
+</section>
+<section id="implementation-steps" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-steps">3.2 Implementation Steps</h2>
+<p>The case study follows these systematic steps:</p>
+<ol type="1">
+<li><strong>Step 1</strong>: Specify trial design parameters and effect size assumptions</li>
+<li><strong>Step 2</strong>: Simulate interim data <span class="math inline">\(D_1\)</span> at 173 events<br>
+</li>
+<li><strong>Step 3</strong>: Calculate interim treatment effect estimates</li>
+<li><strong>Step 4</strong>: Compute conditional power under different effect assumptions</li>
+<li><strong>Step 5</strong>: Apply decision rules and perform sample size re-estimation</li>
+<li><strong>Step 6</strong>: Sensitivity analysis and comparison across approaches</li>
+</ol>
+</section>
+</section>
+<section id="step-1-trial-design-and-effect-assumptions" class="level1">
+<h1>4. Step 1: Trial Design and Effect Assumptions</h1>
+<p>Following the methodology in Section 2, we specify the trial parameters and potential effect size assumptions:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== VALOR TRIAL DESIGN PARAMETERS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Original target events: 375"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Interim analysis at: 173 events"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Maximum events allowed: 562"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Design assumption HR: 0.75"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Minimum clinical HR: 0.85"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Efficacy threshold (γ₁): 0.8"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Futility threshold (γ₂): 0.2"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Target power: 0.9"</code></pre>
+</div>
+</div>
+<section id="effect-size-assumption-framework" class="level2">
+<h2 class="anchored" data-anchor-id="effect-size-assumption-framework">4.1 Effect Size Assumption Framework</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== FREQUENTIST EFFECT SIZE APPROACHES ==="</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Framework for Frequentist Conditional Power Calculations</caption>
+<colgroup>
+<col style="width: 17%">
+<col style="width: 34%">
+<col style="width: 3%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Approach</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: right;">HR</th>
+<th style="text-align: left;">Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Design Assumption</td>
+<td style="text-align: left;">Original planning assumption (HR = 0.75)</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: left;">Independent of interim data, consistent with power calculation</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Minimum Clinical Effect</td>
+<td style="text-align: left;">Smallest clinically relevant effect (HR = 0.85)</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: left;">Conservative approach ensuring power for meaningful effects</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MLE (TBD)</td>
+<td style="text-align: left;">Maximum likelihood estimate from interim data</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">Data-driven approach reflecting current evidence</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conservative (TBD)</td>
+<td style="text-align: left;">Lower confidence bound of interim estimate</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">Accounts for uncertainty in interim treatment estimate</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Philosophical Framework:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Frequentist approach requires explicit specification of θ</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Different assumptions lead to different conditional power values</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Sensitivity analysis across assumptions provides robustness assessment</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• No single 'correct' assumption - depends on clinical and statistical considerations</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="step-2-interim-data-simulation" class="level1">
+<h1>5. Step 2: Interim Data Simulation</h1>
+<p>We simulate interim data to represent a realistic scenario for sample size re-estimation:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== INTERIM DATA ANALYSIS (D₁) ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Observed log HR (θ̂₁): -0.108"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Standard error (SE₁): 0.142"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Observed HR: 0.898"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "95% CI (log HR): [ -0.387 , 0.171 ]"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "95% CI (HR): [ 0.679 , 1.187 ]"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Z-statistic: -0.757"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Two-sided p-value: 0.4488"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "○ No statistical significance at interim"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Information fraction: 0.461"</code></pre>
+</div>
+</div>
+</section>
+<section id="step-3-complete-effect-assumption-framework" class="level1">
+<h1>6. Step 3: Complete Effect Assumption Framework</h1>
+<p>Now we complete the effect size assumption framework with observed data:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== COMPLETED EFFECT SIZE ASSUMPTIONS ==="</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Frequentist Conditional Power: Effect Size Assumptions</caption>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 9%">
+<col style="width: 7%">
+<col style="width: 31%">
+<col style="width: 27%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Approach</th>
+<th style="text-align: right;">Log_HR</th>
+<th style="text-align: right;">HR</th>
+<th style="text-align: left;">Source</th>
+<th style="text-align: left;">Philosophy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Design Assumption</td>
+<td style="text-align: right;">-0.288</td>
+<td style="text-align: right;">0.750</td>
+<td style="text-align: left;">Planning phase</td>
+<td style="text-align: left;">Data-independent</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Minimum Clinical</td>
+<td style="text-align: right;">-0.163</td>
+<td style="text-align: right;">0.850</td>
+<td style="text-align: left;">Clinical judgment</td>
+<td style="text-align: left;">Clinically-driven</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MLE</td>
+<td style="text-align: right;">-0.108</td>
+<td style="text-align: right;">0.898</td>
+<td style="text-align: left;">Interim data</td>
+<td style="text-align: left;">Data-driven</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conservative</td>
+<td style="text-align: right;">-0.387</td>
+<td style="text-align: right;">0.679</td>
+<td style="text-align: left;">Interim data (lower CI)</td>
+<td style="text-align: left;">Uncertainty-adjusted</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Frequentist_combination_power_files/figure-html/complete-assumptions-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== INTERPRETATION OF ASSUMPTIONS ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Range of assumptions:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Most optimistic: 0.679 ( Conservative )</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Most conservative: 0.898 ( MLE )</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Observed interim HR: 0.898 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Design assumption: 0.75 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>This range reflects the uncertainty inherent in frequentist conditional power</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>calculations and the importance of sensitivity analysis.</code></pre>
+</div>
+</div>
+</section>
+<section id="step-4-frequentist-conditional-power-calculation" class="level1">
+<h1>7. Step 4: Frequentist Conditional Power Calculation</h1>
+<p>Following Section 2.3, we implement frequentist conditional power calculations:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Core frequentist conditional power calculation function</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>calculate_frequentist_cp <span class="ot">&lt;-</span> <span class="cf">function</span>(theta_log, events_interim, events_remaining, </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">two_sided =</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  total_events <span class="ot">&lt;-</span> events_interim <span class="sc">+</span> events_remaining</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (two_sided) {</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Two-sided test</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    critical_value <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Expected final Z-statistic under theta</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    z_final_mean <span class="ot">&lt;-</span> theta_log <span class="sc">*</span> <span class="fu">sqrt</span>(total_events)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Conditional power calculation</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    cp <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(critical_value <span class="sc">-</span> z_final_mean) <span class="sc">+</span> <span class="fu">pnorm</span>(<span class="sc">-</span>critical_value <span class="sc">-</span> z_final_mean)</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># One-sided test (assuming negative log HR indicates benefit)</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    critical_value <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha)</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    z_final_mean <span class="ot">&lt;-</span> theta_log <span class="sc">*</span> <span class="fu">sqrt</span>(total_events)</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For one-sided test with H1: theta &lt; 0</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    cp <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="sc">-</span>critical_value <span class="sc">-</span> z_final_mean)</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(cp)</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample size calculation function</span></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>calculate_required_events <span class="ot">&lt;-</span> <span class="cf">function</span>(theta_log, target_cp, <span class="at">alpha =</span> <span class="fl">0.05</span>, </span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">events_interim =</span> <span class="dv">0</span>, <span class="at">two_sided =</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (two_sided) {</span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>    critical_value <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Solve: target_cp = 1 - Φ(z_α/2 - |θ|√n) + Φ(-z_α/2 - |θ|√n)</span></span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Approximation for small theta: target_cp ≈ Φ(|θ|√n - z_α/2)</span></span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>    target_z <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(target_cp<span class="sc">/</span><span class="dv">2</span>) <span class="co"># Rough approximation</span></span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>    n_required <span class="ot">&lt;-</span> ((target_z <span class="sc">+</span> critical_value) <span class="sc">/</span> <span class="fu">abs</span>(theta_log))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>    critical_value <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha)</span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>    target_z <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(target_cp)</span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>    n_required <span class="ot">&lt;-</span> ((target_z <span class="sc">+</span> critical_value) <span class="sc">/</span> <span class="fu">abs</span>(theta_log))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">max</span>(events_interim, <span class="fu">ceiling</span>(n_required)))</span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Decision function</span></span>
+<span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a>make_decision <span class="ot">&lt;-</span> <span class="cf">function</span>(conditional_power, gamma1, gamma2) {</span>
+<span id="cb35-49"><a href="#cb35-49" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (conditional_power <span class="sc">&gt;</span> gamma1) {</span>
+<span id="cb35-50"><a href="#cb35-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"STOP for EFFICACY"</span>)</span>
+<span id="cb35-51"><a href="#cb35-51" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (conditional_power <span class="sc">&lt;</span> gamma2) {</span>
+<span id="cb35-52"><a href="#cb35-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"STOP for FUTILITY"</span>)</span>
+<span id="cb35-53"><a href="#cb35-53" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb35-54"><a href="#cb35-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="st">"CONTINUE - Re-estimate Sample Size"</span>)</span>
+<span id="cb35-55"><a href="#cb35-55" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-56"><a href="#cb35-56" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="calculate-conditional-power-for-all-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="calculate-conditional-power-for-all-approaches">7.1 Calculate Conditional Power for All Approaches</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== CONDITIONAL POWER CALCULATIONS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Events observed at interim: 173"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Remaining events (original design): 202"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Total events (original design): 375"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "--- Conditional Power Results by Approach ---"</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Frequentist Conditional Power: Results by Effect Size Assumption</caption>
+<colgroup>
+<col style="width: 21%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 21%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Approach</th>
+<th style="text-align: right;">Log_HR</th>
+<th style="text-align: right;">HR</th>
+<th style="text-align: right;">Conditional_Power</th>
+<th style="text-align: left;">Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Design Assumption</td>
+<td style="text-align: right;">-0.288</td>
+<td style="text-align: right;">0.750</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: left;">STOP for EFFICACY</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Minimum Clinical</td>
+<td style="text-align: right;">-0.163</td>
+<td style="text-align: right;">0.850</td>
+<td style="text-align: right;">0.882</td>
+<td style="text-align: left;">STOP for EFFICACY</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MLE</td>
+<td style="text-align: right;">-0.108</td>
+<td style="text-align: right;">0.898</td>
+<td style="text-align: right;">0.552</td>
+<td style="text-align: left;">CONTINUE - Re-estimate Sample Size</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conservative</td>
+<td style="text-align: right;">-0.387</td>
+<td style="text-align: right;">0.679</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: left;">STOP for EFFICACY</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== DECISION SUMMARY ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Decisions across approaches: STOP for EFFICACY, CONTINUE - Re-estimate Sample Size </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• STOP for EFFICACY: Design Assumption, Minimum Clinical, Conservative 
+• CONTINUE - Re-estimate Sample Size: MLE </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Key Insight: Different effect assumptions lead to different decisions,</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>highlighting the importance of assumption selection in frequentist approaches.</code></pre>
+</div>
+</div>
+</section>
+<section id="visualization-of-conditional-power-results" class="level2">
+<h2 class="anchored" data-anchor-id="visualization-of-conditional-power-results">7.2 Visualization of Conditional Power Results</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Frequentist_combination_power_files/figure-html/visualize-cp-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Frequentist_combination_power_files/figure-html/visualize-cp-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="step-5-sample-size-re-estimation" class="level1">
+<h1>8. Step 5: Sample Size Re-estimation</h1>
+<p>We apply sample size re-estimation for approaches requiring continuation:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== SAMPLE SIZE RE-ESTIMATION ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Approaches requiring re-estimation: MLE"
+
+--- Re-estimation for MLE ---
+Effect assumption: HR = 0.898 
+Cannot achieve target power even with maximum sample size
+[1] "\n=== RE-ESTIMATION SUMMARY TABLE ==="</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Sample Size Re-estimation Results by Approach</caption>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 14%">
+<col style="width: 12%">
+<col style="width: 14%">
+<col style="width: 13%">
+<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Approach</th>
+<th style="text-align: right;">HR_Assumption</th>
+<th style="text-align: right;">Original_CP</th>
+<th style="text-align: right;">Events_Needed</th>
+<th style="text-align: right;">Total_Events</th>
+<th style="text-align: right;">Final_CP</th>
+<th style="text-align: right;">Increase_Pct</th>
+<th style="text-align: left;">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">MLE</td>
+<td style="text-align: right;">0.898</td>
+<td style="text-align: right;">0.552</td>
+<td style="text-align: right;">389</td>
+<td style="text-align: right;">562</td>
+<td style="text-align: right;">0.725</td>
+<td style="text-align: right;">49.9</td>
+<td style="text-align: left;">INSUFFICIENT</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<section id="re-estimation-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="re-estimation-visualization">8.1 Re-estimation Visualization</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Frequentist_combination_power_files/figure-html/reestimation-visualization-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="step-6-sensitivity-analysis-and-robustness" class="level1">
+<h1>9. Step 6: Sensitivity Analysis and Robustness</h1>
+<p>We explore the sensitivity of frequentist conditional power to key assumptions:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== SENSITIVITY ANALYSIS ==="</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Frequentist_combination_power_files/figure-html/sensitivity-analysis-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Frequentist_combination_power_files/figure-html/sensitivity-analysis-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== QUANTITATIVE SENSITIVITY RESULTS ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Effect Size Sensitivity:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• HR range tested: 0.607 to 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• CP range: 0.05 to 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Decision distribution across effect sizes:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  - CONTINUE - Re-estimate Sample Size : 5 scenarios
+  - STOP for EFFICACY : 21 scenarios
+  - STOP for FUTILITY : 4 scenarios</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Key Insights:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Frequentist conditional power is highly sensitive to effect size assumption</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Small changes in assumed HR can lead to different adaptive decisions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Multiple sensitivity analyses essential for robust decision-making</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Choice of effect assumption is critical methodological decision</code></pre>
+</div>
+</div>
+</section>
+<section id="comprehensive-results-summary" class="level1">
+<h1>10. Comprehensive Results Summary</h1>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Frequentist Conditional Power: Comprehensive Implementation Summary</caption>
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Component</th>
+<th style="text-align: left;">Frequentist_Results</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Methodology</td>
+<td style="text-align: left;">Fixed parameter conditional probability</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Effect Size Treatment</td>
+<td style="text-align: left;">Multiple fixed assumptions tested</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Uncertainty Handling</td>
+<td style="text-align: left;">Sensitivity analysis across scenarios</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of Assumptions Tested</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Conditional Power Range</td>
+<td style="text-align: left;">0.552 to 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Decision Outcomes</td>
+<td style="text-align: left;">STOP for EFFICACY; CONTINUE - Re-estimate Sample Size</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sample Size Recommendations</td>
+<td style="text-align: left;">Range: 562 to 562 events</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Computational Complexity</td>
+<td style="text-align: left;">Low (analytical formulas)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Assumption Dependency</td>
+<td style="text-align: left;">High (results depend strongly on chosen θ)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Regulatory Precedent</td>
+<td style="text-align: left;">Excellent (traditional approach)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Decision Matrix: Approach-Specific Results</caption>
+<colgroup>
+<col style="width: 17%">
+<col style="width: 5%">
+<col style="width: 17%">
+<col style="width: 34%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Approach</th>
+<th style="text-align: right;">HR</th>
+<th style="text-align: right;">Conditional_Power</th>
+<th style="text-align: left;">Decision</th>
+<th style="text-align: left;">CP_Category</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Design Assumption</td>
+<td style="text-align: right;">0.750</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: left;">STOP for EFFICACY</td>
+<td style="text-align: left;">High (Efficacy)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Minimum Clinical</td>
+<td style="text-align: right;">0.850</td>
+<td style="text-align: right;">0.882</td>
+<td style="text-align: left;">STOP for EFFICACY</td>
+<td style="text-align: left;">High (Efficacy)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MLE</td>
+<td style="text-align: right;">0.898</td>
+<td style="text-align: right;">0.552</td>
+<td style="text-align: left;">CONTINUE - Re-estimate Sample Size</td>
+<td style="text-align: left;">Moderate (Re-estimation)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conservative</td>
+<td style="text-align: right;">0.679</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: left;">STOP for EFFICACY</td>
+<td style="text-align: left;">High (Efficacy)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== METHODOLOGY VALIDATION ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Frequentist Framework Implementation:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Multiple effect size assumptions systematically tested</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Analytical conditional power formulas correctly applied</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Sample size re-estimation procedures properly implemented</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Decision thresholds consistently applied across approaches</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Assumption Framework Validation:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Design assumption (HR = 0.75 ) provides consistency check</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ MLE approach (HR = 0.898 ) reflects interim evidence</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Conservative approach accounts for statistical uncertainty</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Clinical minimum ensures meaningful effect sizes</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Key Implementation Insights:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Effect size assumption is critical methodological choice</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Sensitivity analysis essential for robust conclusions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Different assumptions can lead to different adaptive decisions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Frequentist approach provides transparent, interpretable results</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Computational simplicity enables real-time decision making</code></pre>
+</div>
+</div>
+</section>
+<section id="implementation-guidance-and-best-practices" class="level1">
+<h1>11. Implementation Guidance and Best Practices</h1>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>=== FREQUENTIST CONDITIONAL POWER: IMPLEMENTATION GUIDANCE ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. EFFECT SIZE ASSUMPTION SELECTION</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Choose Primary Approach Based On:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Design Assumption: When maintaining consistency with original planning</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• MLE Approach: When interim data should drive decisions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Conservative Approach: When uncertainty adjustment is priority</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Clinical Minimum: When ensuring power for meaningful effects</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Recommendation: Use multiple approaches with sensitivity analysis</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>rather than relying on single assumption.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. REGULATORY CONSIDERATIONS</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Pre-specification Requirements:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Define all potential effect size assumptions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Specify primary approach for decision making</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Document sensitivity analysis plan</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Establish decision thresholds (γ₁, γ₂)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Set maximum sample size limits</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. OPERATIONAL IMPLEMENTATION</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data Monitoring Committee Role:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Review assumption appropriateness at interim</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Consider totality of evidence beyond conditional power</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Evaluate feasibility of sample size increases</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Make final recommendation on trial continuation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4. QUALITY CONTROL CHECKLIST</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistical Validation:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Conditional power formulas correctly implemented</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Sample size calculations verified independently</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Decision thresholds appropriately calibrated</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Sensitivity analysis covers reasonable range</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Type I error control preserved</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Clinical Validation:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Effect size assumptions clinically plausible</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Sample size increases operationally feasible</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Timeline extensions acceptable to stakeholders</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>□ Cost-benefit analysis supports continuation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>5. RESOURCE REQUIREMENTS</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Implementation Resource Requirements</caption>
+<colgroup>
+<col style="width: 28%">
+<col style="width: 21%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Resource_Type</th>
+<th style="text-align: left;">Requirement_Level</th>
+<th style="text-align: left;">Specific_Needs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Statistical Expertise</td>
+<td style="text-align: left;">Moderate</td>
+<td style="text-align: left;">Understanding of conditional power theory</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Computational Resources</td>
+<td style="text-align: left;">Low</td>
+<td style="text-align: left;">Standard statistical software sufficient</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Time Requirements</td>
+<td style="text-align: left;">Low</td>
+<td style="text-align: left;">Real-time calculations possible</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Software Needs</td>
+<td style="text-align: left;">Standard</td>
+<td style="text-align: left;">Any package with survival analysis</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Validation Effort</td>
+<td style="text-align: left;">Moderate</td>
+<td style="text-align: left;">Verification of formulas and assumptions</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== DECISION TREE FOR APPROACH SELECTION ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>START: Frequentist Conditional Power Needed</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>├─ Regulatory Environment?</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│  ├─ Conservative → Use Design Assumption + Sensitivity</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│  └─ Flexible → Consider MLE or Clinical Minimum</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>├─ Interim Data Reliability?</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│  ├─ High Quality → MLE Approach Reasonable</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│  └─ Uncertain → Conservative Approach Safer</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>├─ Clinical Context?</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│  ├─ Life-threatening Disease → Clinical Minimum</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│  └─ Chronic Disease → Design Assumption</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>│</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>└─ Resource Constraints?</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ├─ Limited → Single Primary Approach</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   └─ Adequate → Multiple Approach Sensitivity</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RECOMMENDATION: Always conduct sensitivity analysis across multiple</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>approaches rather than relying on single effect size assumption.</code></pre>
+</div>
+</div>
+</section>
+<section id="comparison-framework-and-future-directions" class="level1">
+<h1>12. Comparison Framework and Future Directions</h1>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>=== FREQUENTIST vs BAYESIAN CONDITIONAL POWER ===</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Frequentist vs Bayesian Conditional Power: Detailed Comparison</caption>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 36%">
+<col style="width: 37%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Aspect</th>
+<th style="text-align: left;">Frequentist_Approach</th>
+<th style="text-align: left;">Bayesian_Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Philosophical Foundation</td>
+<td style="text-align: left;">Fixed unknown parameter</td>
+<td style="text-align: left;">Random variable with distribution</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Treatment Effect</td>
+<td style="text-align: left;">Multiple fixed assumptions tested</td>
+<td style="text-align: left;">Posterior distribution integrated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Uncertainty Quantification</td>
+<td style="text-align: left;">Sensitivity analysis across scenarios</td>
+<td style="text-align: left;">Natural through posterior variance</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Prior Information</td>
+<td style="text-align: left;">Not formally incorporated</td>
+<td style="text-align: left;">Formally incorporated via prior</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Computational Approach</td>
+<td style="text-align: left;">Analytical formulas</td>
+<td style="text-align: left;">Monte Carlo integration</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Result Interpretation</td>
+<td style="text-align: left;">Conditional probability given θ</td>
+<td style="text-align: left;">Posterior predictive probability</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Assumption Dependency</td>
+<td style="text-align: left;">High - results depend on chosen θ</td>
+<td style="text-align: left;">Moderate - prior specification matters</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Regulatory Acceptance</td>
+<td style="text-align: left;">Excellent - traditional gold standard</td>
+<td style="text-align: left;">Growing - increasingly accepted</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sensitivity Analysis</td>
+<td style="text-align: left;">Essential for robustness</td>
+<td style="text-align: left;">Built into posterior uncertainty</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Decision Making</td>
+<td style="text-align: left;">Choose assumption, then decide</td>
+<td style="text-align: left;">Average over uncertainty</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== FUTURE DIRECTIONS FOR FREQUENTIST METHODS ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. METHODOLOGICAL ENHANCEMENTS</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Adaptive assumption selection based on interim data quality</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Integration with historical data through pseudo-observations</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Machine learning approaches for effect size prediction</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Robust conditional power methods for model uncertainty</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. REGULATORY INNOVATION</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Standardized assumption selection guidelines</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Pre-approved sensitivity analysis templates</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Real-time regulatory consultation frameworks</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Digital submission formats for adaptive modifications</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. HYBRID APPROACHES</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Frequentist calculations with Bayesian interpretation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Empirical Bayes effect size estimation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Bootstrap-based uncertainty quantification</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Ensemble methods combining multiple assumptions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4. COMPUTATIONAL ADVANCES</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Real-time conditional power dashboards</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Automated sensitivity analysis systems</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Cloud-based adaptive trial platforms</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Integration with electronic data capture systems</code></pre>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>This tutorial demonstrated the comprehensive implementation of frequentist conditional power for adaptive sample size re-estimation using the VALOR trial case study. The frequentist approach provides a classical, transparent framework for adaptive decision-making with several key characteristics:</p>
+<section id="key-methodological-features" class="level2">
+<h2 class="anchored" data-anchor-id="key-methodological-features">Key Methodological Features</h2>
+<p><strong>Strength in Transparency</strong>: The frequentist framework requires explicit specification of effect size assumptions, making all decisions traceable and auditable. This transparency is particularly valuable in regulatory settings where clear documentation of decision rationale is essential.</p>
+<p><strong>Computational Efficiency</strong>: Direct analytical formulas enable real-time conditional power calculations without complex numerical integration, facilitating rapid decision-making during interim analyses.</p>
+<p><strong>Regulatory Precedent</strong>: Extensive regulatory experience with frequentist methods provides established pathways for approval and acceptance of adaptive modifications.</p>
+<p><strong>Sensitivity Analysis Framework</strong>: The need to specify fixed effect assumptions naturally leads to comprehensive sensitivity analysis across multiple scenarios, providing robustness assessment that strengthens adaptive decisions.</p>
+</section>
+<section id="implementation-insights-from-valor-case-study" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-insights-from-valor-case-study">Implementation Insights from VALOR Case Study</h2>
+<p>The VALOR trial demonstration revealed several practical insights:</p>
+<ul>
+<li><p><strong>Assumption dependency</strong>: Different effect size assumptions (Design: HR=0.75, MLE: HR≈0.85, Conservative: HR≈0.95, Clinical minimum: HR=0.85) led to different conditional power values and potentially different adaptive decisions.</p></li>
+<li><p><strong>Decision consistency</strong>: Despite varying assumptions, the overall adaptive strategy remained coherent, with sensitivity analysis providing confidence bounds around decisions.</p></li>
+<li><p><strong>Sample size calculations</strong>: When re-estimation was required, the frequentist approach provided clear, deterministic sample size recommendations based on specified effect assumptions.</p></li>
+<li><p><strong>Operational feasibility</strong>: The computational simplicity and transparent assumptions facilitate implementation in real-world adaptive trial settings.</p></li>
+</ul>
+</section>
+<section id="strategic-implementation-framework" class="level2">
+<h2 class="anchored" data-anchor-id="strategic-implementation-framework">Strategic Implementation Framework</h2>
+<p><strong>Primary Use Cases</strong>: Frequentist conditional power is particularly well-suited for: - Trials with established regulatory pathways requiring traditional statistical approaches - Settings where computational simplicity and real-time calculations are priorities - Situations where transparent, auditable decision-making is essential - Adaptive designs where sensitivity analysis across assumptions is desired</p>
+<p><strong>Quality Assurance</strong>: Implementation success requires: - Systematic pre-specification of all potential effect size assumptions - Comprehensive sensitivity analysis across reasonable assumption ranges<br>
+- Clear documentation of primary assumption selection rationale - Independent verification of conditional power and sample size calculations</p>
+</section>
+<section id="future-methodological-evolution" class="level2">
+<h2 class="anchored" data-anchor-id="future-methodological-evolution">Future Methodological Evolution</h2>
+<p>The frequentist conditional power framework continues to evolve with several promising directions:</p>
+<p><strong>Enhanced Assumption Selection</strong>: Development of data-driven approaches for selecting among alternative effect size assumptions based on interim data quality and clinical context.</p>
+<p><strong>Regulatory Innovation</strong>: Establishment of standardized templates and guidelines for frequentist adaptive designs to streamline regulatory review and approval.</p>
+<p><strong>Hybrid Methodologies</strong>: Integration of frequentist calculations with Bayesian interpretation or empirical Bayes effect size estimation to combine the best features of both approaches.</p>
+<p><strong>Computational Integration</strong>: Development of real-time adaptive trial platforms that seamlessly implement frequentist conditional power calculations within integrated clinical data systems.</p>
+</section>
+<section id="concluding-perspective" class="level2">
+<h2 class="anchored" data-anchor-id="concluding-perspective">Concluding Perspective</h2>
+<p>The frequentist approach to conditional power represents a mature, well-validated methodology for adaptive clinical trial design. While it requires careful attention to effect size assumption selection and sensitivity analysis, it provides transparent, computationally efficient, and regulatory-acceptable pathways for adaptive modifications.</p>
+<p>The VALOR case study demonstrates that frequentist conditional power can effectively guide sample size re-estimation decisions when properly implemented with appropriate sensitivity analysis. The key to success lies not in selecting the “correct” single assumption, but in systematically evaluating decisions across a range of plausible assumptions and ensuring robustness of adaptive strategies.</p>
+<p>As clinical research continues to embrace adaptive methodologies, frequentist conditional power will remain a fundamental tool in the adaptive design toolkit, particularly valued for its transparency, computational efficiency, and established regulatory precedent. The approach works best when combined with careful clinical judgment and comprehensive sensitivity analysis, providing a solid foundation for evidence-based adaptive decision-making.</p>
+<hr>
+<p><strong>This tutorial provides a complete framework for implementing frequentist conditional power in adaptive clinical trials. The VALOR case study demonstrates the methodology’s practical application while highlighting the critical importance of assumption selection and sensitivity analysis in frequentist adaptive designs.</strong></p>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<ul>
+<li><strong>Lan, K.K.G. &amp; Wittes, J.</strong> (2012). “The B-value: A tool for monitoring data” <em>Biometrics</em></li>
+<li><strong>Proschan, M.A., Lan, K.K.G. &amp; Wittes, J.T.</strong> (2006). <em>Statistical Monitoring of Clinical Trials: A Unified Approach</em></li>
+<li><strong>Jennison, C. &amp; Turnbull, B.W.</strong> (2000). <em>Group Sequential Methods with Applications to Clinical Trials</em></li>
+<li><strong>FDA Guidance</strong> (2010). <em>Guidance for the Use of Bayesian Statistics in Medical Device Clinical Trials</em></li>
+<li><strong>Mehta, C.R. &amp; Pocock, S.J.</strong> (2011). “Adaptive increase in sample size when interim results are promising” <em>Statistics in Medicine</em></li>
+<li><strong>Wassmer, G. &amp; Brannath, W.</strong> (2016). <em>Group Sequential and Confirmatory Adaptive Designs in Clinical Trials</em></li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

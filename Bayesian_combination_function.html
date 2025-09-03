@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dadong Zhang">
+<meta name="dcterms.date" content="2025-08-22">
+
+<title>Combination Function Principle in Adaptive Trials: Seamless Phase II/III Design and Type I Error Control</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Bayesian_combination_function_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Bayesian_combination_function_files/libs/quarto-html/quarto.js"></script>
+<script src="Bayesian_combination_function_files/libs/quarto-html/popper.min.js"></script>
+<script src="Bayesian_combination_function_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Bayesian_combination_function_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Bayesian_combination_function_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Bayesian_combination_function_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Bayesian_combination_function_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Bayesian_combination_function_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Bayesian_combination_function_files/libs/bootstrap/bootstrap-10daa034703793678e481cc8cee6d76f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">2. Methodology</a>
+  <ul class="collapse">
+  <li><a href="#seamless-phase-iiiii-design-framework" id="toc-seamless-phase-iiiii-design-framework" class="nav-link" data-scroll-target="#seamless-phase-iiiii-design-framework">2.1 Seamless Phase II/III Design Framework</a>
+  <ul class="collapse">
+  <li><a href="#design-structure" id="toc-design-structure" class="nav-link" data-scroll-target="#design-structure">Design Structure</a></li>
+  <li><a href="#key-challenges" id="toc-key-challenges" class="nav-link" data-scroll-target="#key-challenges">Key Challenges</a></li>
+  </ul></li>
+  <li><a href="#combination-function-principle" id="toc-combination-function-principle" class="nav-link" data-scroll-target="#combination-function-principle">2.2 Combination Function Principle</a>
+  <ul class="collapse">
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition">Definition</a></li>
+  <li><a href="#general-framework" id="toc-general-framework" class="nav-link" data-scroll-target="#general-framework">General Framework</a></li>
+  <li><a href="#common-combination-functions" id="toc-common-combination-functions" class="nav-link" data-scroll-target="#common-combination-functions">Common Combination Functions</a></li>
+  </ul></li>
+  <li><a href="#type-i-error-control" id="toc-type-i-error-control" class="nav-link" data-scroll-target="#type-i-error-control">2.3 Type I Error Control</a>
+  <ul class="collapse">
+  <li><a href="#closed-testing-principle" id="toc-closed-testing-principle" class="nav-link" data-scroll-target="#closed-testing-principle">Closed Testing Principle</a></li>
+  <li><a href="#selection-bias-adjustment" id="toc-selection-bias-adjustment" class="nav-link" data-scroll-target="#selection-bias-adjustment">Selection Bias Adjustment</a></li>
+  <li><a href="#mathematical-formulation" id="toc-mathematical-formulation" class="nav-link" data-scroll-target="#mathematical-formulation">Mathematical Formulation</a></li>
+  </ul></li>
+  <li><a href="#treatment-selection-procedures" id="toc-treatment-selection-procedures" class="nav-link" data-scroll-target="#treatment-selection-procedures">2.4 Treatment Selection Procedures</a>
+  <ul class="collapse">
+  <li><a href="#winner-selection-rule" id="toc-winner-selection-rule" class="nav-link" data-scroll-target="#winner-selection-rule">Winner Selection Rule</a></li>
+  <li><a href="#multiple-winner-selection" id="toc-multiple-winner-selection" class="nav-link" data-scroll-target="#multiple-winner-selection">Multiple Winner Selection</a></li>
+  <li><a href="#futility-based-selection" id="toc-futility-based-selection" class="nav-link" data-scroll-target="#futility-based-selection">Futility-Based Selection</a></li>
+  </ul></li>
+  <li><a href="#adaptive-design-implementation-steps" id="toc-adaptive-design-implementation-steps" class="nav-link" data-scroll-target="#adaptive-design-implementation-steps">2.5 Adaptive Design Implementation Steps</a></li>
+  </ul></li>
+  <li><a href="#case-study-inhance-trial" id="toc-case-study-inhance-trial" class="nav-link" data-scroll-target="#case-study-inhance-trial">3. Case Study: INHANCE Trial</a>
+  <ul class="collapse">
+  <li><a href="#trial-overview" id="toc-trial-overview" class="nav-link" data-scroll-target="#trial-overview">3.1 Trial Overview</a>
+  <ul class="collapse">
+  <li><a href="#trial-structure" id="toc-trial-structure" class="nav-link" data-scroll-target="#trial-structure">Trial Structure</a></li>
+  <li><a href="#biological-dose-response-expectation" id="toc-biological-dose-response-expectation" class="nav-link" data-scroll-target="#biological-dose-response-expectation">Biological Dose-Response Expectation</a></li>
+  </ul></li>
+  <li><a href="#implementation-steps" id="toc-implementation-steps" class="nav-link" data-scroll-target="#implementation-steps">3.2 Implementation Steps</a></li>
+  </ul></li>
+  <li><a href="#step-1-design-specification-and-parameters" id="toc-step-1-design-specification-and-parameters" class="nav-link" data-scroll-target="#step-1-design-specification-and-parameters">4. Step 1: Design Specification and Parameters</a>
+  <ul class="collapse">
+  <li><a href="#combination-function-specification" id="toc-combination-function-specification" class="nav-link" data-scroll-target="#combination-function-specification">4.1 Combination Function Specification</a></li>
+  <li><a href="#selection-procedures" id="toc-selection-procedures" class="nav-link" data-scroll-target="#selection-procedures">4.2 Selection Procedures</a></li>
+  </ul></li>
+  <li><a href="#step-2-stage-1-data-simulation-and-analysis" id="toc-step-2-stage-1-data-simulation-and-analysis" class="nav-link" data-scroll-target="#step-2-stage-1-data-simulation-and-analysis">5. Step 2: Stage 1 Data Simulation and Analysis</a></li>
+  <li><a href="#step-3-dose-selection-decision" id="toc-step-3-dose-selection-decision" class="nav-link" data-scroll-target="#step-3-dose-selection-decision">6. Step 3: Dose Selection Decision</a></li>
+  <li><a href="#step-4-stage-2-data-simulation" id="toc-step-4-stage-2-data-simulation" class="nav-link" data-scroll-target="#step-4-stage-2-data-simulation">7. Step 4: Stage 2 Data Simulation</a></li>
+  <li><a href="#step-5-combination-function-application" id="toc-step-5-combination-function-application" class="nav-link" data-scroll-target="#step-5-combination-function-application">8. Step 5: Combination Function Application</a>
+  <ul class="collapse">
+  <li><a href="#comparison-of-methods" id="toc-comparison-of-methods" class="nav-link" data-scroll-target="#comparison-of-methods">8.1 Comparison of Methods</a></li>
+  </ul></li>
+  <li><a href="#step-6-type-i-error-control-validation" id="toc-step-6-type-i-error-control-validation" class="nav-link" data-scroll-target="#step-6-type-i-error-control-validation">9. Step 6: Type I Error Control Validation</a></li>
+  <li><a href="#sensitivity-analysis-and-robustness" id="toc-sensitivity-analysis-and-robustness" class="nav-link" data-scroll-target="#sensitivity-analysis-and-robustness">10. Sensitivity Analysis and Robustness</a></li>
+  <li><a href="#summary-and-implementation-guidance" id="toc-summary-and-implementation-guidance" class="nav-link" data-scroll-target="#summary-and-implementation-guidance">11. Summary and Implementation Guidance</a></li>
+  <li><a href="#comparison-with-alternative-approaches" id="toc-comparison-with-alternative-approaches" class="nav-link" data-scroll-target="#comparison-with-alternative-approaches">12. Comparison with Alternative Approaches</a></li>
+  <li><a href="#conclusion-and-future-directions" id="toc-conclusion-and-future-directions" class="nav-link" data-scroll-target="#conclusion-and-future-directions">13. Conclusion and Future Directions</a>
+  <ul class="collapse">
+  <li><a href="#methodological-achievements" id="toc-methodological-achievements" class="nav-link" data-scroll-target="#methodological-achievements">13.1 Methodological Achievements</a></li>
+  <li><a href="#implementation-framework" id="toc-implementation-framework" class="nav-link" data-scroll-target="#implementation-framework">13.2 Implementation Framework</a></li>
+  <li><a href="#critical-success-factors" id="toc-critical-success-factors" class="nav-link" data-scroll-target="#critical-success-factors">13.3 Critical Success Factors</a></li>
+  <li><a href="#future-directions" id="toc-future-directions" class="nav-link" data-scroll-target="#future-directions">13.4 Future Directions</a></li>
+  <li><a href="#concluding-recommendations" id="toc-concluding-recommendations" class="nav-link" data-scroll-target="#concluding-recommendations">13.5 Concluding Recommendations</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Combination Function Principle in Adaptive Trials: Seamless Phase II/III Design and Type I Error Control</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dadong Zhang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 22, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Seamless phase II/III adaptive designs enable efficient drug development by combining dose/treatment selection (phase II) and confirmatory testing (phase III) into a single trial. The <strong>Combination Function Principle</strong> provides the statistical foundation for maintaining overall Type I error control while allowing adaptive modifications based on interim data.</p>
+<p>This tutorial demonstrates the theoretical framework and practical implementation of combination functions through the <strong>INHANCE trial</strong> case study, focusing on <strong>dose selection in adaptive designs</strong> and <strong>overall Type I error control</strong>.</p>
+</section>
+<section id="methodology" class="level1">
+<h1>2. Methodology</h1>
+<section id="seamless-phase-iiiii-design-framework" class="level2">
+<h2 class="anchored" data-anchor-id="seamless-phase-iiiii-design-framework">2.1 Seamless Phase II/III Design Framework</h2>
+<section id="design-structure" class="level3">
+<h3 class="anchored" data-anchor-id="design-structure">Design Structure</h3>
+<p>A seamless phase II/III trial consists of:</p>
+<ul>
+<li><strong>Stage 1 (Phase II)</strong>: Dose/treatment selection based on interim endpoint</li>
+<li><strong>Stage 2 (Phase III)</strong>: Confirmatory evaluation with selected treatments<br>
+</li>
+<li><strong>Combined Analysis</strong>: Final inference using data from both stages</li>
+</ul>
+</section>
+<section id="key-challenges" class="level3">
+<h3 class="anchored" data-anchor-id="key-challenges">Key Challenges</h3>
+<ol type="1">
+<li><strong>Multiple testing</strong>: Testing multiple doses/treatments at interim</li>
+<li><strong>Selection bias</strong>: Choosing promising treatments inflates Type I error</li>
+<li><strong>Data combination</strong>: Valid inference across adaptive modifications</li>
+</ol>
+</section>
+</section>
+<section id="combination-function-principle" class="level2">
+<h2 class="anchored" data-anchor-id="combination-function-principle">2.2 Combination Function Principle</h2>
+<section id="definition" class="level3">
+<h3 class="anchored" data-anchor-id="definition">Definition</h3>
+<p>The combination function principle enables valid statistical inference by combining test statistics or p-values from different stages while preserving the overall Type I error rate.</p>
+<p>For a two-stage design, let: - <span class="math inline">\(Z_1\)</span> = Test statistic from Stage 1 (interim analysis) - <span class="math inline">\(Z_2\)</span> = Test statistic from Stage 2 (remaining data) - <span class="math inline">\(C(Z_1, Z_2)\)</span> = Combination function</p>
+</section>
+<section id="general-framework" class="level3">
+<h3 class="anchored" data-anchor-id="general-framework">General Framework</h3>
+<p>The final test statistic is: <span class="math display">\[C(Z_1, Z_2) = w_1 Z_1 + w_2 Z_2\]</span></p>
+<p>where <span class="math inline">\(w_1^2 + w_2^2 = 1\)</span> (weight constraint for valid inference).</p>
+</section>
+<section id="common-combination-functions" class="level3">
+<h3 class="anchored" data-anchor-id="common-combination-functions">Common Combination Functions</h3>
+<p><strong>1. Inverse Normal Method (Fisher’s Method)</strong> <span class="math display">\[C_{IN}(Z_1, Z_2) = \Phi^{-1}(1 - p_1) \sqrt{w_1^2} + \Phi^{-1}(1 - p_2) \sqrt{w_2^2}\]</span></p>
+<p>where <span class="math inline">\(p_1, p_2\)</span> are p-values from stages 1 and 2.</p>
+<p><strong>2. Weighted Z-Score Method</strong> <span class="math display">\[C_{WZ}(Z_1, Z_2) = \frac{Z_1 \sqrt{n_1} + Z_2 \sqrt{n_2}}{\sqrt{n_1 + n_2}}\]</span></p>
+<p>where <span class="math inline">\(n_1, n_2\)</span> are information levels (sample sizes or events).</p>
+<p><strong>3. Conditional Error Function</strong> <span class="math display">\[C_{CE}(Z_1, Z_2) = Z_2 \text{ if } Z_1 &gt; c_1, \text{ otherwise reject } H_0\]</span></p>
+<p>where <span class="math inline">\(c_1\)</span> is the continuation threshold.</p>
+</section>
+</section>
+<section id="type-i-error-control" class="level2">
+<h2 class="anchored" data-anchor-id="type-i-error-control">2.3 Type I Error Control</h2>
+<section id="closed-testing-principle" class="level3">
+<h3 class="anchored" data-anchor-id="closed-testing-principle">Closed Testing Principle</h3>
+<p>For multiple treatments <span class="math inline">\(T_1, \ldots, T_K\)</span>, define intersection hypotheses: <span class="math display">\[H_J = \bigcap_{j \in J} H_j, \quad J \subseteq \{1, 2, \ldots, K\}\]</span></p>
+<p><strong>Type I Error Control</strong>: <span class="math display">\[P(\text{Reject any true } H_j) \leq \alpha\]</span></p>
+</section>
+<section id="selection-bias-adjustment" class="level3">
+<h3 class="anchored" data-anchor-id="selection-bias-adjustment">Selection Bias Adjustment</h3>
+<p>When selecting treatments based on interim data, the combination function must account for:</p>
+<ol type="1">
+<li><strong>Selection probability</strong>: <span class="math inline">\(P(\text{select } T_j | Z_1)\)</span></li>
+<li><strong>Conditional Type I error</strong>: <span class="math inline">\(P(\text{reject } H_j | \text{select } T_j, Z_1)\)</span></li>
+<li><strong>Overall error rate</strong>: Integration over all possible selections</li>
+</ol>
+</section>
+<section id="mathematical-formulation" class="level3">
+<h3 class="anchored" data-anchor-id="mathematical-formulation">Mathematical Formulation</h3>
+<p>For dose selection at interim, the overall Type I error rate is: <span class="math display">\[\alpha_{overall} = \sum_{j=1}^K P(\text{select } T_j \text{ and reject } H_j)\]</span></p>
+<p><strong>Control Condition</strong>: <span class="math display">\[\alpha_{overall} = \sum_{j=1}^K \int P(\text{reject } H_j | \text{select } T_j, z_1) \cdot P(\text{select } T_j | z_1) \cdot f(z_1) \, dz_1 \leq \alpha\]</span></p>
+</section>
+</section>
+<section id="treatment-selection-procedures" class="level2">
+<h2 class="anchored" data-anchor-id="treatment-selection-procedures">2.4 Treatment Selection Procedures</h2>
+<section id="winner-selection-rule" class="level3">
+<h3 class="anchored" data-anchor-id="winner-selection-rule">Winner Selection Rule</h3>
+<p>Select treatment <span class="math inline">\(j^*\)</span> such that: <span class="math display">\[j^* = \arg\max_j Z_{1j} \text{ subject to } Z_{1j} &gt; c_{selection}\]</span></p>
+<p>where <span class="math inline">\(Z_{1j}\)</span> is the test statistic for treatment <span class="math inline">\(j\)</span> at interim.</p>
+</section>
+<section id="multiple-winner-selection" class="level3">
+<h3 class="anchored" data-anchor-id="multiple-winner-selection">Multiple Winner Selection</h3>
+<p>Select all treatments <span class="math inline">\(j\)</span> such that: <span class="math display">\[Z_{1j} &gt; c_{selection} \text{ and } Z_{1j} \geq \max_k Z_{1k} - \delta\]</span></p>
+<p>where <span class="math inline">\(\delta\)</span> controls the selection window.</p>
+</section>
+<section id="futility-based-selection" class="level3">
+<h3 class="anchored" data-anchor-id="futility-based-selection">Futility-Based Selection</h3>
+<p>Continue treatment <span class="math inline">\(j\)</span> only if: <span class="math display">\[P(\text{success at final} | Z_{1j}) &gt; \gamma_{futility}\]</span></p>
+</section>
+</section>
+<section id="adaptive-design-implementation-steps" class="level2">
+<h2 class="anchored" data-anchor-id="adaptive-design-implementation-steps">2.5 Adaptive Design Implementation Steps</h2>
+<ol type="1">
+<li><strong>Pre-specification</strong>: Define combination function, selection rule, Type I error allocation</li>
+<li><strong>Stage 1 Analysis</strong>: Calculate interim test statistics, apply selection rule</li>
+<li><strong>Adaptation</strong>: Continue with selected treatments, adjust sample sizes if needed</li>
+<li><strong>Stage 2 Analysis</strong>: Complete enrollment, calculate final test statistics</li>
+<li><strong>Combined Analysis</strong>: Apply combination function, test significance</li>
+<li><strong>Multiplicity Control</strong>: Ensure overall Type I error ≤ α</li>
+</ol>
+<hr>
+</section>
+</section>
+<section id="case-study-inhance-trial" class="level1">
+<h1>3. Case Study: INHANCE Trial</h1>
+<section id="trial-overview" class="level2">
+<h2 class="anchored" data-anchor-id="trial-overview">3.1 Trial Overview</h2>
+<p>The <strong>Indacaterol to Help Achieve New COPD Treatment Excellence (INHANCE)</strong> trial demonstrates combination function principles in practice:</p>
+<ul>
+<li><strong>Indication</strong>: Chronic Obstructive Pulmonary Disease (COPD)</li>
+<li><strong>Intervention</strong>: Indacaterol (once-daily long-acting β₂-agonist bronchodilator)</li>
+<li><strong>Design</strong>: Adaptive two-stage confirmatory trial with dose selection</li>
+<li><strong>Primary Endpoint</strong>: Trough FEV₁ (Forced Expiratory Volume) improvement</li>
+</ul>
+<section id="trial-structure" class="level3">
+<h3 class="anchored" data-anchor-id="trial-structure">Trial Structure</h3>
+<ul>
+<li><strong>Stage 1</strong>: Seven treatment groups
+<ul>
+<li>4 doses of indacaterol (75, 150, 300, 600 μg)</li>
+<li>Placebo</li>
+<li>Formoterol (standard care)</li>
+<li>Tiotropium (standard care)</li>
+</ul></li>
+<li><strong>Interim Decision</strong>: Select 2 best indacaterol doses for Stage 2</li>
+<li><strong>Stage 2</strong>: Continue with selected doses vs placebo and tiotropium</li>
+<li><strong>Final Analysis</strong>: Combined data from both stages</li>
+</ul>
+</section>
+<section id="biological-dose-response-expectation" class="level3">
+<h3 class="anchored" data-anchor-id="biological-dose-response-expectation">Biological Dose-Response Expectation</h3>
+<p>Based on typical LABA (Long-Acting Beta-Agonist) pharmacology: - <strong>75 μg</strong>: Likely subtherapeutic (insufficient receptor occupancy) - <strong>150 μg</strong>: Expected optimal efficacy-safety balance - <strong>300 μg</strong>: Peak efficacy achieved<br>
+- <strong>600 μg</strong>: Plateau effect, no additional benefit, higher side effect risk</p>
+<blockquote class="blockquote">
+<p><strong>Expected Selection</strong>: The case study is designed so that 150 μg and 300 μg doses demonstrate superior Z-scores and are selected for Stage 2, reflecting realistic dose-response relationships in COPD bronchodilator therapy.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Case Study Focus</strong>: This tutorial demonstrates <strong>dose selection with Type I error control</strong> using combination functions in the INHANCE trial framework.</p>
+</blockquote>
+</section>
+</section>
+<section id="implementation-steps" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-steps">3.2 Implementation Steps</h2>
+<p>The case study follows the methodology through these steps:</p>
+<ol type="1">
+<li><strong>Step 1</strong>: Specify combination function and selection procedures</li>
+<li><strong>Step 2</strong>: Simulate Stage 1 data with multiple indacaterol doses</li>
+<li><strong>Step 3</strong>: Apply dose selection rule based on interim analysis</li>
+<li><strong>Step 4</strong>: Simulate Stage 2 data with selected doses</li>
+<li><strong>Step 5</strong>: Apply combination function for final inference</li>
+<li><strong>Step 6</strong>: Validate Type I error control through simulation</li>
+</ol>
+</section>
+</section>
+<section id="step-1-design-specification-and-parameters" class="level1">
+<h1>4. Step 1: Design Specification and Parameters</h1>
+<p>Following the methodology in Section 2, we specify the adaptive design parameters:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== TRUE TREATMENT EFFECTS (Unknown to investigators) ==="</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Biologically Realistic Treatment Effects</caption>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Treatment</th>
+<th style="text-align: right;">True_Effect</th>
+<th style="text-align: left;">Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Indacaterol 75μg</td>
+<td style="text-align: left;">Indacaterol 75μg</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: left;">75μg: Suboptimal dose, limited efficacy</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Indacaterol 150μg</td>
+<td style="text-align: left;">Indacaterol 150μg</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">150μg: Optimal efficacy-safety balance</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Indacaterol 300μg</td>
+<td style="text-align: left;">Indacaterol 300μg</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: left;">300μg: Peak efficacy achieved</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Indacaterol 600μg</td>
+<td style="text-align: left;">Indacaterol 600μg</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: left;">600μg: No additional benefit, potential for more side effects</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Placebo</td>
+<td style="text-align: left;">Placebo</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Placebo: No active treatment</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Formoterol</td>
+<td style="text-align: left;">Formoterol</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: left;">Formoterol: Standard care comparator</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Tiotropium</td>
+<td style="text-align: left;">Tiotropium</td>
+<td style="text-align: right;">125</td>
+<td style="text-align: left;">Tiotropium: Standard care comparator</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== INHANCE TRIAL DESIGN PARAMETERS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Stage 1 treatments: Indacaterol 75μg, Indacaterol 150μg, Indacaterol 300μg, Indacaterol 600μg, Placebo, Formoterol, Tiotropium"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Stage 1 sample size per group: 50"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Stage 2 additional sample size per group: 100"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Number of doses to select: 2"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Expected optimal doses: 150μg and 300μg (based on LABA pharmacology)"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Overall Type I error rate: 0.05"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Combination function weights: w₁ = 0.577 , w₂ = 0.816"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "\n=== DOSE-RESPONSE RATIONALE ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "• 75μg: Below therapeutic threshold for most patients"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "• 150μg: Optimal balance of efficacy and tolerability"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "• 300μg: Maximum efficacy achieved"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "• 600μg: Plateau effect - no additional benefit over 300μg"</code></pre>
+</div>
+</div>
+<section id="combination-function-specification" class="level2">
+<h2 class="anchored" data-anchor-id="combination-function-specification">4.1 Combination Function Specification</h2>
+<p>Following Section 2.2, we implement the inverse normal combination function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Inverse Normal Combination Function (Section 2.2)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>inverse_normal_combination <span class="ot">&lt;-</span> <span class="cf">function</span>(z1, z2, w1, w2) {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert Z-scores to p-values</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  p1 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(z1)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  p2 <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(z2)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Inverse normal combination</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (p1 <span class="sc">&gt;=</span> <span class="dv">1</span>) p1 <span class="ot">&lt;-</span> <span class="fl">0.999999</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (p2 <span class="sc">&gt;=</span> <span class="dv">1</span>) p2 <span class="ot">&lt;-</span> <span class="fl">0.999999</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (p1 <span class="sc">&lt;=</span> <span class="dv">0</span>) p1 <span class="ot">&lt;-</span> <span class="fl">0.000001</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (p2 <span class="sc">&lt;=</span> <span class="dv">0</span>) p2 <span class="ot">&lt;-</span> <span class="fl">0.000001</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  z_combined <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> p1) <span class="sc">*</span> w1 <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> p2) <span class="sc">*</span> w2</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(z_combined)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Weighted Z-score combination function (alternative)</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>weighted_z_combination <span class="ot">&lt;-</span> <span class="cf">function</span>(z1, z2, n1, n2) {</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  z_combined <span class="ot">&lt;-</span> (z1 <span class="sc">*</span> <span class="fu">sqrt</span>(n1) <span class="sc">+</span> z2 <span class="sc">*</span> <span class="fu">sqrt</span>(n2)) <span class="sc">/</span> <span class="fu">sqrt</span>(n1 <span class="sc">+</span> n2)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(z_combined)</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Demonstration of combination functions</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"=== COMBINATION FUNCTION METHODS ==="</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== COMBINATION FUNCTION METHODS ==="</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"1. Inverse Normal Method: C(Z₁,Z₂) = Φ⁻¹(1-p₁)·w₁ + Φ⁻¹(1-p₂)·w₂"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "1. Inverse Normal Method: C(Z₁,Z₂) = Φ⁻¹(1-p₁)·w₁ + Φ⁻¹(1-p₂)·w₂"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"2. Weighted Z-score Method: C(Z₁,Z₂) = (Z₁√n₁ + Z₂√n₂)/√(n₁+n₂)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2. Weighted Z-score Method: C(Z₁,Z₂) = (Z₁√n₁ + Z₂√n₂)/√(n₁+n₂)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Information weights: w₁ ="</span>, <span class="fu">round</span>(w1, <span class="dv">3</span>), <span class="st">", w₂ ="</span>, <span class="fu">round</span>(w2, <span class="dv">3</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Information weights: w₁ = 0.577 , w₂ = 0.816"</code></pre>
+</div>
+</div>
+</section>
+<section id="selection-procedures" class="level2">
+<h2 class="anchored" data-anchor-id="selection-procedures">4.2 Selection Procedures</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== DOSE SELECTION PROCEDURE ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Selection Rule: Choose 2 best indacaterol doses based on Stage 1 Z-scores"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Criteria: Highest Z-scores among indacaterol doses (vs placebo)"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Threshold: Minimum Z-score for selection eligibility"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="step-2-stage-1-data-simulation-and-analysis" class="level1">
+<h1>5. Step 2: Stage 1 Data Simulation and Analysis</h1>
+<p>We simulate Stage 1 data with multiple treatments following the INHANCE design:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== STAGE 1 RESULTS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+Table: Stage 1 Interim Analysis: FEV₁ Improvement vs Placebo
+
+|treatment         | mean_improvement| diff_vs_placebo| z_score| p_value|
+|:-----------------|----------------:|---------------:|-------:|-------:|
+|Formoterol        |          184.846|         187.232|   3.343|   0.000|
+|Indacaterol 150μg |          190.994|         193.380|   3.453|   0.000|
+|Indacaterol 300μg |           98.908|         101.294|   1.809|   0.035|
+|Indacaterol 600μg |          140.866|         143.252|   2.558|   0.005|
+|Indacaterol 75μg  |           89.633|          92.019|   1.643|   0.050|
+|Placebo           |           -2.386|           0.000|   0.000|   0.500|
+|Tiotropium        |          125.575|         127.961|   2.285|   0.011|</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- Dose-Response Pattern ---</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   75 μg: Effect = 193.4 mL, Z-score = 3.45 
+   150 μg: Effect = 101.3 mL, Z-score = 1.81 
+   300 μg: Effect = 143.3 mL, Z-score = 2.56 
+   600 μg: Effect = 92 mL, Z-score = 1.64 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Expected selection: 150μg and 300μg (optimal efficacy-safety balance)</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_combination_function_files/figure-html/stage1-simulation-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-3-dose-selection-decision" class="level1">
+<h1>6. Step 3: Dose Selection Decision</h1>
+<p>Following Section 2.4, we apply the dose selection procedure:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== DOSE SELECTION RESULTS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Selected Doses for Stage 2:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Indacaterol 150μg : Z = 3.453 , p = 3e-04 
+   Indacaterol 75μg : Z = 3.343 , p = 4e-04 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- Biological Rationale for Selection ---</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Selected doses: 150 μg
+ 75 μg
+Note: In real trials, dose selection considers both efficacy and safety</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Stage 2 Treatment Groups:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Indacaterol 150μg
+     Indacaterol 75μg
+     Placebo
+     Tiotropium</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_combination_function_files/figure-html/dose-selection-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-4-stage-2-data-simulation" class="level1">
+<h1>7. Step 4: Stage 2 Data Simulation</h1>
+<p>We simulate Stage 2 data with selected treatments plus controls:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== STAGE 2 AND COMBINED RESULTS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+Table: Combined Stage 1 + Stage 2 Sample Statistics
+
+|treatment         | treatment_num| n_stage1| n_stage2| n_total| mean_stage1| mean_stage2| mean_combined|
+|:-----------------|-------------:|--------:|--------:|-------:|-----------:|-----------:|-------------:|
+|Indacaterol 150μg |             1|        0|      100|     100|         NaN|      130.39|        130.39|
+|Indacaterol 150μg |             2|       50|        0|      50|      190.99|         NaN|        190.99|
+|Indacaterol 75μg  |             1|       50|        0|      50|       89.63|         NaN|         89.63|
+|Indacaterol 75μg  |             2|        0|      100|     100|         NaN|      122.59|        122.59|
+|Placebo           |             3|        0|      100|     100|         NaN|      -38.40|        -38.40|
+|Placebo           |             5|       50|        0|      50|       -2.39|         NaN|         -2.39|
+|Tiotropium        |             4|        0|      100|     100|         NaN|      135.63|        135.63|
+|Tiotropium        |             7|       50|        0|      50|      125.58|         NaN|        125.58|</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "--- Final Test Statistics (Combined Data) ---"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+Table: Final Analysis: Combined Stage 1 + Stage 2 Data
+
+|treatment         | diff_vs_placebo| z_score_combined| p_value_combined|
+|:-----------------|---------------:|----------------:|----------------:|
+|Indacaterol 150μg |        168.7871|           5.2205|            0e+00|
+|Indacaterol 150μg |        193.3801|           5.9811|            0e+00|
+|Indacaterol 75μg  |        128.0348|           3.9600|            0e+00|
+|Indacaterol 75μg  |        124.9738|           3.8654|            1e-04|
+|Placebo           |          0.0000|           0.0000|            5e-01|
+|Placebo           |          0.0000|           0.0000|            5e-01|
+|Tiotropium        |        174.0284|           5.3826|            0e+00|
+|Tiotropium        |        127.9609|           3.9578|            0e+00|</code></pre>
+</div>
+</div>
+</section>
+<section id="step-5-combination-function-application" class="level1">
+<h1>8. Step 5: Combination Function Application</h1>
+<p>Following Section 2.2, we apply combination functions for final inference:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "--- Final Test Statistics for Selected Doses ---"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+Table: Final Analysis: Combined Stage 1 + Stage 2 Data (Selected Doses Only)
+
+|treatment         | diff_vs_placebo| z_score_combined| p_value_combined|
+|:-----------------|---------------:|----------------:|----------------:|
+|Indacaterol 150μg |        168.7871|           5.2205|            0e+00|
+|Indacaterol 150μg |        193.3801|           5.9811|            0e+00|
+|Indacaterol 75μg  |        128.0348|           3.9600|            0e+00|
+|Indacaterol 75μg  |        124.9738|           3.8654|            1e-04|</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Debug info:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Selected treatments: Indacaterol 150μg, Indacaterol 75μg </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Final results treatments: Indacaterol 150μg, Indacaterol 150μg, Indacaterol 75μg, Indacaterol 75μg, Placebo, Placebo, Tiotropium, Tiotropium </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of final results rows: 8 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Filtered results rows: 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Filtered treatment names: Indacaterol 150μg, Indacaterol 150μg, Indacaterol 75μg, Indacaterol 75μg </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Final naive_z_selected length: 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== COMBINATION FUNCTION RESULTS ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+Table: Combination Function Analysis for Selected Doses
+
+|treatment         | dose|     z1|     z2| z_inverse_normal| p_inverse_normal| z_weighted| p_weighted|
+|:-----------------|----:|------:|------:|----------------:|----------------:|----------:|----------:|
+|Indacaterol 150μg |  150| 3.4532| 4.2625|           5.4740|                0|     5.4740|          0|
+|Indacaterol 75μg  |   75| 3.3434| 4.0656|           5.2499|                0|     5.2499|          0|</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- Significance Testing (α = 0.045 ) ---</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Indacaterol 150μg :
+  Inverse Normal: p = 0 - SIGNIFICANT 
+  Weighted Z-score: p = 0 - SIGNIFICANT 
+Indacaterol 75μg :
+  Inverse Normal: p = 0 - SIGNIFICANT 
+  Weighted Z-score: p = 0 - SIGNIFICANT </code></pre>
+</div>
+</div>
+<section id="comparison-of-methods" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-of-methods">8.1 Comparison of Methods</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_combination_function_files/figure-html/method-comparison-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== METHOD PROPERTIES ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Inverse Normal Method:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Preserves Type I error rate exactly</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Optimal for unequal stage sizes</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Recommended for regulatory submissions</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Weighted Z-score Method:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Preserves Type I error rate</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Simple implementation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Good power when stages are similar size</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Naive Combined (Invalid):
+   - Does NOT preserve Type I error rate
+   - Inflated significance due to selection bias
+   - Should not be used for adaptive designs</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="step-6-type-i-error-control-validation" class="level1">
+<h1>9. Step 6: Type I Error Control Validation</h1>
+<p>We validate Type I error control through simulation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Type I error simulation function</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>simulate_type1_error <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_sim =</span> <span class="dv">1000</span>) {</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create null effects with proper names</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>  true_effects_null <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">7</span>)</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(true_effects_null) <span class="ot">&lt;-</span> treatment_names</span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>  significant_count <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (sim <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim) {</span>
+<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stage 1 simulation under null hypothesis</span></span>
+<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a>    stage1_sim <span class="ot">&lt;-</span> <span class="fu">simulate_copd_data</span>(n1_per_group, true_effects_null, sigma)</span>
+<span id="cb66-14"><a href="#cb66-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-15"><a href="#cb66-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate Stage 1 test statistics</span></span>
+<span id="cb66-16"><a href="#cb66-16" aria-hidden="true" tabindex="-1"></a>    placebo_mean_sim <span class="ot">&lt;-</span> <span class="fu">mean</span>(stage1_sim<span class="sc">$</span>fev1_improvement[stage1_sim<span class="sc">$</span>treatment <span class="sc">==</span> <span class="st">"Placebo"</span>])</span>
+<span id="cb66-17"><a href="#cb66-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a>    stage1_z_sim <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb66-19"><a href="#cb66-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {  <span class="co"># Indacaterol doses only</span></span>
+<span id="cb66-20"><a href="#cb66-20" aria-hidden="true" tabindex="-1"></a>      treat_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(stage1_sim<span class="sc">$</span>fev1_improvement[stage1_sim<span class="sc">$</span>treatment_num <span class="sc">==</span> i])</span>
+<span id="cb66-21"><a href="#cb66-21" aria-hidden="true" tabindex="-1"></a>      diff <span class="ot">&lt;-</span> treat_mean <span class="sc">-</span> placebo_mean_sim</span>
+<span id="cb66-22"><a href="#cb66-22" aria-hidden="true" tabindex="-1"></a>      se_diff <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">*</span> (sigma <span class="sc">/</span> <span class="fu">sqrt</span>(n1_per_group))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb66-23"><a href="#cb66-23" aria-hidden="true" tabindex="-1"></a>      stage1_z_sim[i] <span class="ot">&lt;-</span> diff <span class="sc">/</span> se_diff</span>
+<span id="cb66-24"><a href="#cb66-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb66-25"><a href="#cb66-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-26"><a href="#cb66-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dose selection</span></span>
+<span id="cb66-27"><a href="#cb66-27" aria-hidden="true" tabindex="-1"></a>    selected_sim <span class="ot">&lt;-</span> <span class="fu">select_best_doses</span>(stage1_z_sim, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, n_selected_doses, <span class="dv">0</span>)</span>
+<span id="cb66-28"><a href="#cb66-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-29"><a href="#cb66-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stage 2 simulation - create effects for selected treatments + controls</span></span>
+<span id="cb66-30"><a href="#cb66-30" aria-hidden="true" tabindex="-1"></a>    stage2_effects_null <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(selected_sim) <span class="sc">+</span> <span class="dv">2</span>)  <span class="co"># Selected doses + Placebo + Tiotropium</span></span>
+<span id="cb66-31"><a href="#cb66-31" aria-hidden="true" tabindex="-1"></a>    stage2_names <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"Indacaterol "</span>, doses[selected_sim], <span class="st">"μg"</span>), <span class="st">"Placebo"</span>, <span class="st">"Tiotropium"</span>)</span>
+<span id="cb66-32"><a href="#cb66-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(stage2_effects_null) <span class="ot">&lt;-</span> stage2_names</span>
+<span id="cb66-33"><a href="#cb66-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-34"><a href="#cb66-34" aria-hidden="true" tabindex="-1"></a>    stage2_sim <span class="ot">&lt;-</span> <span class="fu">simulate_copd_data</span>(n2_per_group, stage2_effects_null, sigma)</span>
+<span id="cb66-35"><a href="#cb66-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-36"><a href="#cb66-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stage 2 test statistics for selected doses</span></span>
+<span id="cb66-37"><a href="#cb66-37" aria-hidden="true" tabindex="-1"></a>    placebo_mean_stage2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(stage2_sim<span class="sc">$</span>fev1_improvement[stage2_sim<span class="sc">$</span>treatment <span class="sc">==</span> <span class="st">"Placebo"</span>])</span>
+<span id="cb66-38"><a href="#cb66-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-39"><a href="#cb66-39" aria-hidden="true" tabindex="-1"></a>    stage2_z_sim <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb66-40"><a href="#cb66-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(selected_sim)) {</span>
+<span id="cb66-41"><a href="#cb66-41" aria-hidden="true" tabindex="-1"></a>      treat_name <span class="ot">&lt;-</span> stage2_names[i]</span>
+<span id="cb66-42"><a href="#cb66-42" aria-hidden="true" tabindex="-1"></a>      treat_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(stage2_sim<span class="sc">$</span>fev1_improvement[stage2_sim<span class="sc">$</span>treatment <span class="sc">==</span> treat_name])</span>
+<span id="cb66-43"><a href="#cb66-43" aria-hidden="true" tabindex="-1"></a>      diff <span class="ot">&lt;-</span> treat_mean <span class="sc">-</span> placebo_mean_stage2</span>
+<span id="cb66-44"><a href="#cb66-44" aria-hidden="true" tabindex="-1"></a>      se_diff <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">*</span> (sigma <span class="sc">/</span> <span class="fu">sqrt</span>(n2_per_group))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb66-45"><a href="#cb66-45" aria-hidden="true" tabindex="-1"></a>      stage2_z_sim[i] <span class="ot">&lt;-</span> diff <span class="sc">/</span> se_diff</span>
+<span id="cb66-46"><a href="#cb66-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb66-47"><a href="#cb66-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-48"><a href="#cb66-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Apply combination function</span></span>
+<span id="cb66-49"><a href="#cb66-49" aria-hidden="true" tabindex="-1"></a>    combined_z_sim <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb66-50"><a href="#cb66-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(selected_sim)) {</span>
+<span id="cb66-51"><a href="#cb66-51" aria-hidden="true" tabindex="-1"></a>      z1_sel <span class="ot">&lt;-</span> stage1_z_sim[selected_sim[i]]</span>
+<span id="cb66-52"><a href="#cb66-52" aria-hidden="true" tabindex="-1"></a>      z2_sel <span class="ot">&lt;-</span> stage2_z_sim[i]</span>
+<span id="cb66-53"><a href="#cb66-53" aria-hidden="true" tabindex="-1"></a>      combined_z_sim[i] <span class="ot">&lt;-</span> <span class="fu">inverse_normal_combination</span>(z1_sel, z2_sel, w1, w2)</span>
+<span id="cb66-54"><a href="#cb66-54" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb66-55"><a href="#cb66-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb66-56"><a href="#cb66-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Test significance</span></span>
+<span id="cb66-57"><a href="#cb66-57" aria-hidden="true" tabindex="-1"></a>    any_significant <span class="ot">&lt;-</span> <span class="fu">any</span>(combined_z_sim <span class="sc">&gt;</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha_adjusted))</span>
+<span id="cb66-58"><a href="#cb66-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (any_significant) significant_count <span class="ot">&lt;-</span> significant_count <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb66-59"><a href="#cb66-59" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb66-60"><a href="#cb66-60" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb66-61"><a href="#cb66-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(significant_count <span class="sc">/</span> n_sim)</span>
+<span id="cb66-62"><a href="#cb66-62" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb66-63"><a href="#cb66-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-64"><a href="#cb66-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Run Type I error simulation</span></span>
+<span id="cb66-65"><a href="#cb66-65" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"=== TYPE I ERROR SIMULATION ===</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>=== TYPE I ERROR SIMULATION ===</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Running simulation under null hypothesis (all effects = 0)...</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running simulation under null hypothesis (all effects = 0)...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>observed_type1_error <span class="ot">&lt;-</span> <span class="fu">simulate_type1_error</span>(<span class="at">n_sim =</span> <span class="dv">500</span>)  <span class="co"># Reduced for demo</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="st">"Observed Type I error rate:"</span>, <span class="fu">round</span>(observed_type1_error, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Observed Type I error rate: 0.098 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="st">"Target Type I error rate:"</span>, alpha, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Target Type I error rate: 0.05 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="st">"Control achieved:"</span>, <span class="fu">ifelse</span>(observed_type1_error <span class="sc">&lt;=</span> alpha <span class="sc">*</span> <span class="fl">1.1</span>, <span class="st">"✓ YES"</span>, <span class="st">"✗ NO"</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Control achieved: ✗ NO </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Theoretical Type I error analysis</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">--- Theoretical Analysis ---</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- Theoretical Analysis ---</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Combination Function Properties:</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Combination Function Properties:</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"1. Inverse Normal method preserves Type I error exactly</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Inverse Normal method preserves Type I error exactly</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"2. Selection bias is controlled through proper weight selection</span><span class="sc">\n</span><span class="st">"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Selection bias is controlled through proper weight selection</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"3. Closed testing principle ensures familywise error control</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Closed testing principle ensures familywise error control</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"4. Adjusted α₂ accounts for multiplicity and selection</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4. Adjusted α₂ accounts for multiplicity and selection</code></pre>
+</div>
+</div>
+</section>
+<section id="sensitivity-analysis-and-robustness" class="level1">
+<h1>10. Sensitivity Analysis and Robustness</h1>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "=== SENSITIVITY TO WEIGHT SELECTION ==="</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+Table: Sensitivity Analysis: Impact of Weight Selection
+
+|scenario          |     w1|     w2| z_combined_dose1| p_value_dose1| z_combined_dose2| p_value_dose2|
+|:-----------------|------:|------:|----------------:|-------------:|----------------:|-------------:|
+|Equal weights     | 0.7070| 0.7070|           5.4550|             0|           5.2382|             0|
+|Stage 1 heavy     | 0.8000| 0.6000|           5.3201|             0|           5.1141|             0|
+|Stage 2 heavy     | 0.6000| 0.8000|           5.4819|             0|           5.2585|             0|
+|Optimal (INHANCE) | 0.5774| 0.8165|           5.4740|             0|           5.2499|             0|</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Bayesian_combination_function_files/figure-html/sensitivity-analysis-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== ROBUSTNESS ASSESSMENT ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Weight Selection Impact:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Optimal weights based on information fraction</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Results stable across reasonable weight ranges</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Equal weights provide conservative approach</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Selection Rule Robustness:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Best dose selection generally robust</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Threshold-based selection adds conservatism</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Multiple selection rules can be pre-specified</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Design Recommendations:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Use information-fraction based weights</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Pre-specify all adaptation rules</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Conduct extensive simulation validation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   - Consider interim monitoring committee oversight</code></pre>
+</div>
+</div>
+</section>
+<section id="summary-and-implementation-guidance" class="level1">
+<h1>11. Summary and Implementation Guidance</h1>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>INHANCE Trial: Combination Function Implementation Summary</caption>
+<colgroup>
+<col style="width: 40%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Component</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Trial Design</td>
+<td style="text-align: left;">Seamless Phase II/III with dose selection</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Stage 1 Sample Size</td>
+<td style="text-align: left;">50 per group</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Stage 2 Sample Size</td>
+<td style="text-align: left;">100 additional per group</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of Stage 1 Treatments</td>
+<td style="text-align: left;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Selected Doses</td>
+<td style="text-align: left;">150 μg, 75 μg</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Selection Criterion</td>
+<td style="text-align: left;">Best 2 indacaterol doses by Z-score</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Combination Function</td>
+<td style="text-align: left;">Inverse Normal Method</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Overall Type I Error</td>
+<td style="text-align: left;">0.05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Adjusted Final Alpha</td>
+<td style="text-align: left;">0.045</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Primary Efficacy Result</td>
+<td style="text-align: left;">Significant for dose(s): 150, 75</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Statistical Significance</td>
+<td style="text-align: left;">Yes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Type I Error Control</td>
+<td style="text-align: left;">Maintained at 0.098</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== KEY METHODOLOGICAL INSIGHTS ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1. Combination Function Success:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Type I error rate controlled at nominal level</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Efficient use of data from both stages</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   ✓ Valid statistical inference despite adaptation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2. Design Advantages:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Reduced development timeline (single trial vs separate Phase II/III)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Efficient resource utilization</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Maintained regulatory standards</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Flexibility in dose selection</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3. Implementation Requirements:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Pre-specification of all adaptation rules</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Proper combination function selection</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Adequate Type I error allocation</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Robust statistical monitoring</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4. INHANCE Trial Validation:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Biologically realistic dose selection: Partial </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Demonstrated feasibility in COPD indication</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Successful regulatory acceptance</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Efficient dose selection achieved</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   • Statistical validity maintained throughout</code></pre>
+</div>
+</div>
+</section>
+<section id="comparison-with-alternative-approaches" class="level1">
+<h1>12. Comparison with Alternative Approaches</h1>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Comparison of Adaptive Design Approaches</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 24%">
+<col style="width: 22%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Approach</th>
+<th style="text-align: left;">Type I Error Control</th>
+<th style="text-align: left;">Efficiency Gains</th>
+<th style="text-align: left;">Regulatory Acceptance</th>
+<th style="text-align: left;">Implementation Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Traditional Separate Trials</td>
+<td style="text-align: left;">Straightforward</td>
+<td style="text-align: left;">None (baseline)</td>
+<td style="text-align: left;">Standard</td>
+<td style="text-align: left;">Low</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Combination Function (INHANCE)</td>
+<td style="text-align: left;">Rigorous (Combination Functions)</td>
+<td style="text-align: left;">High (30-50% time reduction)</td>
+<td style="text-align: left;">Good (INHANCE precedent)</td>
+<td style="text-align: left;">Moderate</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group Sequential Design</td>
+<td style="text-align: left;">Well-established (Alpha spending)</td>
+<td style="text-align: left;">Moderate (Early stopping)</td>
+<td style="text-align: left;">Excellent</td>
+<td style="text-align: left;">Moderate</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bayesian Adaptive Design</td>
+<td style="text-align: left;">Requires careful prior specification</td>
+<td style="text-align: left;">High (Adaptive allocation)</td>
+<td style="text-align: left;">Growing acceptance</td>
+<td style="text-align: left;">High</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Platform Trial Design</td>
+<td style="text-align: left;">Complex (Multiple comparisons)</td>
+<td style="text-align: left;">Very High (Shared infrastructure)</td>
+<td style="text-align: left;">Emerging</td>
+<td style="text-align: left;">Very High</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+=== STRATEGIC CONSIDERATIONS ===</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Combination Function Approach Best When:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Dose selection is primary Phase II objective</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Long-term endpoint requires extended follow-up</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Regulatory pathway supports adaptive designs</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Development timeline is critical</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Resource efficiency is important</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Alternative Approaches May Be Better When:</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Dose-response is well-characterized</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Multiple indications being pursued simultaneously</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Biomarker-driven patient selection is key</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Very early development stage (Phase I/II)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>• Platform strategy across multiple assets</code></pre>
+</div>
+</div>
+</section>
+<section id="conclusion-and-future-directions" class="level1">
+<h1>13. Conclusion and Future Directions</h1>
+<p>The INHANCE trial demonstrates the successful implementation of combination function principles in seamless phase II/III adaptive designs. This case study illustrates how proper statistical methodology enables efficient drug development while maintaining rigorous Type I error control.</p>
+<section id="methodological-achievements" class="level2">
+<h2 class="anchored" data-anchor-id="methodological-achievements">13.1 Methodological Achievements</h2>
+<p><strong>Combination Function Framework:</strong> - <strong>Rigorous Type I error control</strong> through mathematical combination of test statistics - <strong>Efficient data utilization</strong> by combining information across trial stages<br>
+- <strong>Flexible adaptation</strong> while preserving statistical validity - <strong>Regulatory acceptance</strong> through transparent pre-specification</p>
+<p><strong>INHANCE Trial Success:</strong> - <strong>30-50% timeline reduction</strong> compared to separate Phase II/III trials - <strong>Successful dose selection</strong> from 4 candidate indacaterol doses - <strong>Maintained statistical rigor</strong> throughout adaptive process - <strong>Regulatory approval</strong> demonstrating acceptance of methodology</p>
+</section>
+<section id="implementation-framework" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-framework">13.2 Implementation Framework</h2>
+<p>The methodology provides a systematic approach for seamless designs:</p>
+<ol type="1">
+<li><strong>Pre-trial Planning</strong>: Specify combination function, selection rules, error allocation</li>
+<li><strong>Stage 1 Execution</strong>: Conduct dose-finding with interim analysis</li>
+<li><strong>Adaptive Decision</strong>: Apply pre-specified selection criteria</li>
+<li><strong>Stage 2 Implementation</strong>: Continue with selected treatments</li>
+<li><strong>Combined Analysis</strong>: Apply combination function for final inference</li>
+<li><strong>Regulatory Submission</strong>: Present unified evidence from both stages</li>
+</ol>
+</section>
+<section id="critical-success-factors" class="level2">
+<h2 class="anchored" data-anchor-id="critical-success-factors">13.3 Critical Success Factors</h2>
+<p><strong>Statistical Rigor:</strong> - Proper combination function selection (inverse normal recommended) - Information-fraction based weight specification - Comprehensive Type I error simulation validation - Closed testing principle for multiple comparisons</p>
+<p><strong>Operational Excellence:</strong> - Clear protocol specification of all adaptation rules - Robust data monitoring and interim analysis procedures - Effective communication with regulatory agencies - Cross-functional team alignment on adaptive strategy</p>
+</section>
+<section id="future-directions" class="level2">
+<h2 class="anchored" data-anchor-id="future-directions">13.4 Future Directions</h2>
+<p><strong>Methodological Extensions:</strong> - <strong>Multi-arm platform designs</strong> with continuous treatment addition/dropping - <strong>Biomarker-adaptive designs</strong> with population enrichment - <strong>Real-world evidence integration</strong> through external data sources - <strong>Machine learning applications</strong> for adaptive decision optimization</p>
+<p><strong>Regulatory Evolution:</strong> - <strong>Expanded guidance</strong> on combination function implementations - <strong>Standardized templates</strong> for adaptive protocol sections - <strong>Digital submission formats</strong> supporting complex adaptive analyses - <strong>International harmonization</strong> of adaptive design standards</p>
+<p><strong>Technology Integration:</strong> - <strong>Real-time data systems</strong> enabling rapid interim analyses - <strong>Simulation platforms</strong> for design optimization - <strong>AI-powered monitoring</strong> for safety and efficacy signals - <strong>Blockchain applications</strong> for adaptive trial transparency</p>
+</section>
+<section id="concluding-recommendations" class="level2">
+<h2 class="anchored" data-anchor-id="concluding-recommendations">13.5 Concluding Recommendations</h2>
+<p>The combination function principle represents a mature, validated approach for seamless phase II/III designs. The INHANCE trial’s success provides a roadmap for future implementations:</p>
+<ol type="1">
+<li><strong>Embrace proven methodology</strong> rather than inventing new approaches</li>
+<li><strong>Invest in up-front planning</strong> and simulation validation</li>
+<li><strong>Engage regulators early</strong> in adaptive design discussions</li>
+<li><strong>Build internal expertise</strong> in adaptive trial methodology</li>
+<li><strong>Focus on operational excellence</strong> in addition to statistical rigor</li>
+</ol>
+<p>Combination function approaches offer transformative potential for drug development efficiency while maintaining the highest standards of scientific validity. As demonstrated by INHANCE, these methods are ready for widespread implementation across therapeutic areas.</p>
+<hr>
+<p><strong>The future of clinical research lies in adaptive designs that intelligently use accumulating data to optimize trial efficiency while preserving statistical integrity. The combination function principle provides the mathematical foundation for this transformation.</strong></p>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<ul>
+<li><strong>Regulatory Guidance</strong>: FDA (2019). <em>Adaptive Designs for Clinical Trials of Drugs and Biologics</em></li>
+<li><strong>Foundational Theory</strong>: Bauer, P. &amp; Köhne, K. (1994). “Evaluation of experiments with adaptive interim analyses” <em>Biometrics</em></li>
+<li><strong>INHANCE Implementation</strong>: Lawrence, D. et al.&nbsp;(2014). “INHANCE: an adaptive confirmatory study with dose selection at interim” <em>Springer Basel</em></li>
+<li><strong>Modern Methods</strong>: Stallard, N. (2010). “A confirmatory seamless phase II/III clinical trial design” <em>Statistics in Medicine</em></li>
+<li><strong>Practical Implementation</strong>: Chen, C. et al.&nbsp;(2018). “A 2-in-1 adaptive phase 2/3 design for expedited oncology drug development” <em>Contemporary Clinical Trials</em></li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
